@@ -3,18 +3,18 @@
 Class SJF_Ecwid_Handler {
 	
 	public static function handler( $format ) {
-		
-		if( ! isset( $_POST[self::get_submit_name()] ) ) { return false; }
 
-		if( ! isset( $_POST[self::get_request_type_name()] ) ) { return false; }
-		$request_type = $_POST[self::get_request_type_name()];
+		if( ! isset( $_POST[SJF_Ecwid_Forms::get_submit_name()] ) ) { return false; }
 
-		if( ! isset( $_POST[self::get_route_name()] ) ) { return false; }
-		$route = $_POST[self::get_route_name()];
+		if( ! isset( $_POST[SJF_Ecwid_Forms::get_request_type_name()] ) ) { return false; }
+		$request_type = $_POST[SJF_Ecwid_Forms::get_request_type_name()];
 
-		if( ! isset( $_POST[self::get_nonce_name()] ) ) { return false; }
+		if( ! isset( $_POST[SJF_Ecwid_Forms::get_route_name()] ) ) { return false; }
+		$route = $_POST[SJF_Ecwid_Forms::get_route_name()];
 
-		if( ! check_admin_referer( self::get_nonce_action(), self::get_nonce_name() ) ) { return false; }
+		if( ! isset( $_POST[SJF_Ecwid_Forms::get_nonce_name()] ) ) { return false; }
+
+		if( ! check_admin_referer( SJF_Ecwid_Forms::get_nonce_action(), SJF_Ecwid_Forms::get_nonce_name() ) ) { return false; }
 
 		foreach( $_POST as $k => $v ) {
 			if( $k[0] == '_' ) {
@@ -31,15 +31,22 @@ Class SJF_Ecwid_Handler {
 		$out ['body']= $ecwid -> call( $route, $args, $request_type );
 
 		$out ['files']= array();
-		foreach( $_FILES as $route => $file ) {
 
-			if( empty( $file['tmp_name'] ) ) { continue; }
+		$files_count = count( $_FILES );
 
-			$args = file_get_contents( $file['tmp_name'] );
+		if( ! empty( $files_count ) ) {
 
-			$request = $ecwid -> call( $route, $args, 'POST', 'no_encoding' );
+			foreach( $_FILES as $route => $file ) {
 
-			$out ['files'][]= $request;
+				if( empty( $file['tmp_name'] ) ) { continue; }
+
+				$args = file_get_contents( $file['tmp_name'] );
+
+				$request = $ecwid -> call( $route, $args, 'POST', 'no_encoding' );
+
+				$out ['files'][]= $request;
+
+			}
 
 		}
 
@@ -96,19 +103,17 @@ Class SJF_Ecwid_Handler {
 
 		$out = '';
 
-		if( ! isset( $_POST[ self::get_submit_name() ] ) ) { return false; }
+		if( ! isset( $_POST[ SJF_Ecwid_Forms::get_submit_name() ] ) ) { return false; }
 
 		$body = json_decode( $response['body']['body'], TRUE );
 
 		//$update_count = 0;
 		$updated_or_error = 'error';
 		$success_or_fail = esc_html__( 'Failure.', 'sjf_et' );
-		if( isset ( $body['success'] ) ) {
-			if( $body['success'] ) {
-				$success_or_fail = esc_html__( 'Success!', 'sjf_et'  );
-				$updated_or_error = 'updated';
-				//$update_count = $body['updateCount'];
-			}
+		if( isset ( $body['success'] ) || isset( $body['updateCount'] ) || isset( $body['id'] ) ) {
+			$success_or_fail = esc_html__( 'Success!', 'sjf_et'  );
+			$updated_or_error = 'updated';
+			//$update_count = $body['updateCount'];
 		}
 
 		$edit_link = '';
@@ -117,14 +122,14 @@ Class SJF_Ecwid_Handler {
 			$ecwid = new SJF_Ecwid;
 
 			$id    = urlencode( $body['id'] );
-			$route = $_POST[self::get_route_name()];
+			$route = $_POST[SJF_Ecwid_Forms::get_route_name()];
 			$data = $ecwid -> call( "$route/$id" );
 			$created = json_decode( $data['body'], TRUE );
 			$name = esc_html( $created['name'] );
 			$name = "<em>$name</em>";
 			$edit = sprintf( esc_html__( 'Edit %s', 'sjf_et' ), $name );
 			
-			$href = SJF_Admin_Helpers::remove_crud_args();
+			$href = SJF_Ecwid_Admin_Helpers::remove_crud_args();
 			$href = add_query_arg( array( 'action' => 'update' ), $href );
 			$href = add_query_arg( array( 'id' => $id ), $href );
 
@@ -174,8 +179,8 @@ Class SJF_Ecwid_Handler {
 		if( ! isset( $_GET['action'] ) ) { return FALSE; }
 		if( $_GET['action'] != 'delete' ) { return FALSE; }
 
-		$action = self::get_delete_nonce_action( $id, $item_type );
-		$name = self::get_delete_nonce_name( $id, $item_type );
+		$action = SJF_Ecwid_Forms::get_delete_nonce_action( $id, $item_type );
+		$name = SJF_Ecwid_Forms::get_delete_nonce_name( $id, $item_type );
 		if( ! check_admin_referer( $action, $name ) ) { return FALSE; }
 
 		$ecwid = new SJF_Ecwid();

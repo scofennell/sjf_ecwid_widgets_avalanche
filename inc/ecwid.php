@@ -26,19 +26,18 @@ class SJF_Ecwid {
 	 */
 	public function call( $route, $args = array(), $request_type = 'GET', $encode = 'json' ) {
 
-		// Fire up our transients class.  It flushes transients for any request other than GET.
+		// Fire up our transients class.  It flushes transients for any request other than a GET.
 		$transients = new SJF_Ecwid_Transients( $request_type );
 		
-		$endpoint = trailingslashit( esc_url( SJF_Ecwid_Admin_Helpers::get_api_endpoint() ) );
+		// Build the url to which our request will be sent.
+		$endpoint = trailingslashit( esc_url( SJF_Ecwid_Helpers::get_api_endpoint() ) );
 		$store_id = trailingslashit( urlencode( SJF_Ecwid_Helpers::get_store_id() ) );
-		$token    = urlencode( SJF_Ecwid_Admin_Helpers::get_token() );
-		
-		$url = $endpoint . $store_id . $route;
-
-		$url = add_query_arg( array( 'token' => $token ), $url );
+		$token    = urlencode( SJF_Ecwid_Helpers::get_token() );
+		$url      = $endpoint . $store_id . $route;
+		$url      = add_query_arg( array( 'token' => $token ), $url );
 
 		// If it's a get request, see if there's a transient for it.
-		if( $request_type == 'GET' ) {
+		if( ( $request_type == 'GET' ) && ! WP_DEBUG ) {
 
 			// Get the transient key for this url (it gets compressed to 32 chars via MD5).
 			$transient_key = $transients -> get_transient_key( $url );
@@ -52,9 +51,11 @@ class SJF_Ecwid {
 
 		}
 
+		// If we made it this far, there is no transient for this url.  Build our request args.
 		$request_args = array();
 		$request_args['method'] = $request_type;
 		
+		// Unless it's a GET or a DELETE, we may need to send our request as JSON.
 		if( ( $request_type != 'GET' ) && ( $request_type != 'DELETE' ) ) {
 			
 			if( $encode == 'json' ) {
@@ -69,10 +70,18 @@ class SJF_Ecwid {
 
 		}
 
+		// Call ecwid.
 		$out = wp_remote_request( $url, $request_args );
 
+		// If it's an error, return an error message, bailing out before we bother to save a transient.
+		if( is_wp_error( $out ) ) {
+			$error = new SJF_Ecwid_Errors;
+			echo( $error -> get_error_message( $out ) );
+			return FALSE;
+		}
+
 		// If it's a get request, save the output as a transient.
-		if( $request_type == 'GET' ) {
+		if( ( $request_type == 'GET' && ! WP_DEBUG ) ) {
 			$transients -> set_transient( $transient_key, $out );
 		}
 

@@ -18,61 +18,69 @@ add_action( 'init', 'sjf_et_admin_profile_init' );
 class SJF_Ecwid_Admin_Profile {
 
 	/**
-     * Adds actions for our class methods.
-     */
-    function __construct() {
-            
-		add_action( 'admin_menu', array( $this, 'profile_menu_tab' ) );
+	 * Adds actions for our class methods.
+	 */
+	function __construct() {
+			
+		add_action( 'admin_menu', array( $this, 'menu_tab' ) );
 
-    }
+	}
+
+	function get_page_label() {
+		return esc_html__( 'Store Profile', 'sjf_et' );
+	}
+
+	function get_item_type() {
+		return 'profile';
+	}
 
 	/**
 	 * Add a menu item for our plugin.
 	 */
-	function profile_menu_tab() {
-	    
+	function menu_tab() {
+		
 		// Add a primary menu item.
-	    add_submenu_page(
-	    	'sjf-et',
-	    	esc_html__( 'Store Profile', 'sjf_et' ),
-	    	esc_html__( 'Store Profile', 'sjf_et' ),
-	    	SJF_Ecwid_Helpers::get_capability(),
-	    	'store-profile',
-	    	array( $this, 'profile_page' ),
-	    	SJF_Ecwid_Admin_Helpers::get_dashicon_class(),
-	    	6
-	    );
+		add_submenu_page(
+			SJF_Ecwid_Admin_Helpers::get_menu_slug(),
+			$this -> get_page_label(),
+			$this -> get_page_label(),
+			SJF_Ecwid_Helpers::get_capability(),
+			$this -> get_item_type(),
+			array( $this, 'page' ),
+			SJF_Ecwid_Admin_Helpers::get_dashicon_class(),
+			6
+		);
 
 	}
 
 	/**
 	 * A page for used for help / faq  / clearing transients, etc.
 	 */
-	function profile_page() {
-	    
+	function page() {
+		
 		 // Check capability.
 		if( ! current_user_can( SJF_Ecwid_Helpers::get_capability() ) ) { return false; }
 
-	    $title = esc_html__( 'Store Profile', 'sjf_et' );
+		$title = $this -> get_page_label();
 		
 		// If we are editing, give a link to go back to browse.
 		if( SJF_Ecwid_Conditional_Tags::is_editing() ) {
 
 			$profile = $this -> get_profile( 'update' );
-			$link = SJF_Ecwid_Admin_Helpers::get_back_to_browse_link();
+			$link    = SJF_Ecwid_Admin_Helpers::get_back_to_browse_link();
 
 		// Else if we are browsing, give a link to edit.
 		} else {
 			$profile = $this -> get_profile();	
 			$href    = add_query_arg( 'action', 'update' );
 			$label   = esc_html__( 'Edit', 'sjf_et' );
-			$link = "<a href='$href' class='add-new-h2'>$label</a>";
+			$link    = "<a href='$href' class='add-new-h2'>$label</a>";
 		}
 
 		// Draw the page content.
-	    echo "
-	    	<div class='wrap'>
-	 			<h2>$title $link</h2>
+		echo "
+			<div class='wrap'>
+				<h2>$title $link</h2>
 		
 				$profile
 
@@ -91,6 +99,8 @@ class SJF_Ecwid_Admin_Profile {
 
 		$out = '';
 
+		$item_type = $this -> get_item_type();
+
 		// Fire up our class for calling Ecwid.
 		$ecwid = new SJF_Ecwid;
 		
@@ -101,10 +111,10 @@ class SJF_Ecwid_Admin_Profile {
 			$format = $this -> get_format();
 			
 			// Parse any form submission that may have occurred.
-			$handler = SJF_Ecwid_Forms::handler( $format );
+			$handler = SJF_Ecwid_Handler::handler( $format );
 
 			// Gather any feedback from our form submission.
-			$feedback = SJF_Ecwid_Forms::get_feedback( $handler );
+			$feedback = SJF_Ecwid_Handler::get_feedback( $handler );
 			$out .= $feedback;
 
 			/**
@@ -112,15 +122,16 @@ class SJF_Ecwid_Admin_Profile {
 			 * before gathering the new data from ecwid,
 			 * otherwise we'll show outdated data to the user.
 			 */
-			$data = $ecwid -> call( 'profile' );
+			$data = $ecwid -> call( $item_type );
+			
 			$body = json_decode( $data['body'], TRUE );
 
-			$out .= SJF_Ecwid_Forms::form( $format, $body, 'PUT', 'profile' );
+			$out .= SJF_Ecwid_Forms::form( $format, $body, 'PUT', $item_type );
 
 		// Else if we are just reviewing...
 		} else {
 
-			$data = $ecwid -> call( 'profile' );
+			$data = $ecwid -> call( $item_type );
 			$body = json_decode( $data['body'], TRUE );
 
 			$out = SJF_Ecwid_Formatting::array_dig( $body );
@@ -165,14 +176,15 @@ class SJF_Ecwid_Admin_Profile {
 								'label'    => esc_html__( 'Custom Domain', 'sjf_et' ),
 								'sanitize' => 'string',
 							),
-							
+							*/
 							array(
 								'name'     => 'storeLogoUrl',
 								'label'    => esc_html__( 'Store Logo', 'sjf_et' ),
 								'sanitize' => 'image',
+								'type'     => 'file',
 								'route'    => 'profile/logo',
+								'show_on_update' => true,
 							),
-							*/
 						),
 					),
 				),

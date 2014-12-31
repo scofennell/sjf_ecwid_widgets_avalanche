@@ -1,21 +1,21 @@
 <?php
 
 /**
- * Display the products.
+ * Display the categories.
  *
- * Draws the products screen.
+ * Draws the categories screen.
  *
  * @package WordPress
  * @subpackage sjf-et
  * @since SJF ET 0.1
  */
 
-function sjf_et_admin_products_init() {
-	new SJF_Ecwid_Admin_Products();
+function sjf_et_admin_categories_init() {
+	new SJF_Ecwid_Admin_Categories();
 }
-add_action( 'init', 'sjf_et_admin_products_init' );
+add_action( 'init', 'sjf_et_admin_categories_init' );
 
-class SJF_Ecwid_Admin_Products {
+class SJF_Ecwid_Admin_Categories {
 
 	/**
 	 * Adds actions for our class methods.
@@ -27,15 +27,15 @@ class SJF_Ecwid_Admin_Products {
 	}
 
 	function get_page_label() {
-		return esc_html__( 'Products', 'sjf_et' );
+		return esc_html__( 'Categories', 'sjf_et' );
 	}
 
 	function get_item_type() {
-		return 'products';
+		return 'categories';
 	}
 
 	function get_item_type_singular() {
-		return 'product';
+		return 'category';
 	}
 
 	/**
@@ -68,7 +68,7 @@ class SJF_Ecwid_Admin_Products {
 		$namespace = SJF_Ecwid_Helpers::get_namespace();
 
 		$title = $this -> get_page_label();
-			
+		
 		$id = false;
 		if( isset( $_GET['id'] ) ) {
 			$id = absint( $_GET['id'] );
@@ -137,18 +137,21 @@ class SJF_Ecwid_Admin_Products {
 		$pagination = SJF_Ecwid_Pagination::get_pagination( $body );
 		$out .= $pagination;
 
-		$products = $body['items'];
+		$categories = $body['items'];
 
 		$rows = '';
-		if( ! is_array( $products ) ) {
-			$error = esc_html( 'Error: No products found.', 'sjf_et' );
+		if( ! is_array( $categories ) ) {
+
+			var_dump( $categories );
+
+			$error = esc_html( 'Error: No categories found.', 'sjf_et' );
 
 			$out .= $error;
 		}
 
 		$table = new SJF_Ecwid_Admin_List_Tables();
 
-		$out .= $table -> get_table( self::get_format(), $products, $this -> get_item_type(), $this -> get_item_type_singular() );
+		$out .= $table -> get_table( $this -> get_format(), $categories, $this -> get_item_type(), $this -> get_item_type_singular() );
 
 		$items_count = absint( $body['count'] );
 		if( $items_count > 9 ) { $out .= $pagination; }
@@ -233,40 +236,32 @@ class SJF_Ecwid_Admin_Products {
 		
 		$out = array(
 			array(
-				'name'           => 'sku',
-				'label'          => esc_html__( 'SKU', 'sjf_et' ),
-				'sanitize'       => 'string',
-				'show_on_index'  => true,
-				'show_on_create' => true,
-				'show_on_update' => true,
+				'name'          => 'id',
+				'label'         => esc_html__( 'Category ID', 'sjf_et' ),
+				'sanitize'      => 'int',
+				'show_on_index' => true,	
 			),
+
+			array(
+				'name'          => 'parentId',
+				'label'         => esc_html__( 'Parent ID', 'sjf_et' ),
+				'sanitize'      => 'int',
+				'show_on_index' => true,	
+			),
+
 			array(
 				'name'           => 'name',
-				'label'          => esc_html__( 'Product Name', 'sjf_et' ),
+				'label'          => esc_html__( 'Category Name', 'sjf_et' ),
 				'sanitize'       => 'string',
 				'show_on_index'  => true,
 				'show_on_create' => true,
 				'show_on_update' => true,
 			),
-			/*
+			
 			array(
-				'name'          => 'quantity',
-				'label'         => esc_html__( 'Quantity', 'sjf_et' ),
-				'sanitize'      => 'int',
-				'show_on_index' => true,
-			),
-			*/
-			array(
-				'name'           => 'weight',
-				'label'          => esc_html__( 'Weight', 'sjf_et' ),
-				'sanitize'       => 'int',
-				'show_on_create' => true,
-				'show_on_update' => true,				
-			),
-			array(
-				'name'          => 'created',
-				'label'         => esc_html__( 'Created', 'sjf_et' ),
-				'sanitize'      => 'date',
+				'name'     => 'productCount',
+				'label'    => esc_html__( 'Product Count', 'sjf_et' ),
+				'sanitize' => 'int',
 				'show_on_index' => true,
 			),
 

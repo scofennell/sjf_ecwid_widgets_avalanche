@@ -2,7 +2,7 @@
 
 Class SJF_Ecwid_Admin_List_Tables {
 
-	function get_table( $format, $items ) {
+	function get_table( $format, $items, $item_type = FALSE, $item_type_singular = FALSE  ) {
 
 		$out = '';
 
@@ -42,14 +42,14 @@ Class SJF_Ecwid_Admin_List_Tables {
 						$item_href = SJF_Ecwid_Admin_Helpers::remove_browse_args( $item_href );
 						$item_href = esc_url( $item_href );
 						$item_link = "<a class='row-title' href='$item_href'>$item_name</a>";
-						$v = $item_link . SJF_Ecwid_Admin_Helpers::get_crud_links( $item_fields, FALSE, array( 'row-actions' ) );
+						$v = $item_link . SJF_Ecwid_Admin_Helpers::get_crud_links( $item_fields, $item_type, $item_type_singular, array( 'row-actions' ) );
 					}
 
 					$v = wp_kses_post( $v );
 
 					$this_out .= "<td>$v</td>";
 				} else {
-					$this_out .= "<td>$nbsp;</td>";	
+					$this_out .= "<td>&nbsp;</td>";	
 				} 
 			}
 

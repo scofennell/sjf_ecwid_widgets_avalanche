@@ -20,6 +20,13 @@ Class SJF_Ecwid_Conditional_Tags {
 		return TRUE;
 	}
 
+	public static function is_settings_page() {
+		if( ! is_admin() ) { return FALSE; }
+		if( ! isset( $_GET['page'] ) ) { return FALSE; }
+		if( $_GET['page'] != SJF_Ecwid_Admin_Helpers::get_menu_slug() ) { return FALSE; }
+		return TRUE;
+	}
+
 	public static function is_reviewing( $template = 'archive' ) {
 
 		if( self::is_editing() ) { return FALSE; }

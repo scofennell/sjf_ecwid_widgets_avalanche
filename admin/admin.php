@@ -16,9 +16,14 @@ require_once( SJF_ET_ADMIN_PATH . 'admin_helpers.php' );
 require_once( SJF_ET_ADMIN_PATH . 'conditional_tags.php' );
 
 /**
- * Functions for creating and handling forms.
+ * Functions for creatingforms.
  */
 require_once( SJF_ET_ADMIN_PATH . 'forms.php' );
+
+/**
+ * Functions for handling forms.
+ */
+require_once( SJF_ET_ADMIN_PATH . 'handlers.php' );
 
 /**
  * Functions for creating list tables.
@@ -31,36 +36,35 @@ require_once( SJF_ET_ADMIN_PATH . 'list_tables.php' );
 require_once( SJF_ET_ADMIN_PATH . 'admin_enqueue.php' );
 
 /**
+ * Grab our admin notices.
+ */
+require_once( SJF_ET_ADMIN_PATH . 'admin_notices.php' );
+
+/**
  * Echo admin inline scripts.
  */
 require_once( SJF_ET_ADMIN_PATH . 'admin_inline_scripts.php' );
 
-/**
- * Build a form for browsing collections.
- */
-require_once( SJF_ET_ADMIN_PATH . 'browse.php' );
+if( SJF_Ecwid_Helpers::is_authorized() ) {
 
-/**
- * Build a menu for paginating collections.
- */
-require_once( SJF_ET_ADMIN_PATH . 'pagination.php' );
+	/**
+	 * Profile.
+	 */
+	require_once( SJF_ET_ADMIN_PATH . 'profile.php' );
 
-/**
- * Profile.
- */
-require_once( SJF_ET_ADMIN_PATH . 'profile.php' );
+	/**
+	 * Products.
+	 */
+	require_once( SJF_ET_ADMIN_PATH . 'products.php' );
 
-/**
- * Orders.
- */
-require_once( SJF_ET_ADMIN_PATH . 'orders.php' );
+	/**
+	 * Products.
+	 */
+	require_once( SJF_ET_ADMIN_PATH . 'categories.php' );
 
-/**
- * Products.
- */
-require_once( SJF_ET_ADMIN_PATH . 'products.php' );
+	/**
+	 * Dashboard widgets.
+	 */
+	require_once( SJF_ET_ADMIN_PATH . 'dashboard_widgets.php' );
 
-/**
- * Dashboard widgets.
- */
-require_once( SJF_ET_ADMIN_PATH . 'dashboard_widgets.php' );
+}

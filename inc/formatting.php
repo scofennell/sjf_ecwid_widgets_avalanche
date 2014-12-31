@@ -12,6 +12,10 @@ class SJF_Ecwid_Formatting {
 		return preg_replace( '/[^a-zA-Z0-9-]/', '', $string );
 	}
 
+	public static function alphanum_underscore_hyphen( $string ) {
+		return preg_replace( '/[^a-zA-Z0-9-_]/', '', $string );
+	}
+
 	public static function array_dig( $v, $k = null, $title = '' ) {
 		
 		$namespace   = SJF_Ecwid_Helpers::get_namespace();

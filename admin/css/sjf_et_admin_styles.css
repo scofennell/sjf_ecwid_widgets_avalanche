@@ -128,3 +128,83 @@ a.sjf_et-crud-link-delete {
 .sjf_et-crud-link-delete:hover {
 	color: red;
 }
+
+.sjf_et-browse-form {
+	padding: 20px 20px 0 20px;
+}
+
+.sjf_et-browse-form-input {
+	display: inline-block;
+	vertical-align: bottom;
+	min-width: 11%;
+	margin-right: 30px;
+	margin-bottom: 20px;
+}
+
+.sjf_et-browse-form-input input,
+.sjf_et-browse-form-input select {
+	width: 100%;
+}
+
+.sjf_et-browse-form-input-submit {
+	position: relative;
+	top: -1px;
+}
+
+.sjf_et-admin-notice-content {
+	margin: 0.5em 0;
+	padding: 2px;
+}
+
+.sjf_et-admin-notice-content a.sjf_et-auth-link {
+	display: inline-block;
+	margin: 0.5em 0;
+}
+
+.sjf_et-admin-notice-content > :last-child,
+.sjf_et-admin-notice-content > :last-child > :last-child {
+	margin-bottom: 0;
+}
+
+a.button .dashicons {
+	vertical-align: text-bottom;
+}
+
+.sjf_et-settings {
+
+}
+
+.sjf_et-settings-section {
+	border-bottom: 1px solid #ccc;
+	padding-top: 20px;
+	padding-bottom: 30px;
+	border-top: 1px solid #fff;
+}
+
+.sjf_et-settings-section table {
+	margin: 0;
+}
+
+.sjf_et-settings-section table tr:last-child > * {
+	margin-bottom: 0;
+	padding-bottom: 0;
+}
+
+.sjf_et-settings-section h3 {
+	margin: 0 0 10px;
+}
+
+.sjf_et-settings-section > :last-child {
+	padding-bottom: 0;
+	margin-bottom: 0;
+}
+
+.sjf_et-settings-section:first-child {
+	border-top: none;
+	padding-top: 0;
+}
+
+.sjf_et-settings-section:last-child {
+	padding-bottom: 0;
+	border-bottom: none;
+}
