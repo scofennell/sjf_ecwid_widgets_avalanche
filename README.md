@@ -1,28 +1,28 @@
 Ecwid Widgets Avalanche
 =======================
 
-### Contributors
+Grab your Ecwid products and categories into a variety of WordPress widgets, including a slider, a popup, and an accordion.
+
+###### Contributors
 scofennell@gmail.com
 
-### Tags
+###### Tags
 Ecwid, Ecommerce, E-Commerce, Online Store, Ecwid Slider, Ecwid Popup, Ecwid Accordion.
 
-### Requires at least
+###### Requires at least
 4.1
 
-### Tested up to
+###### Tested up to
 4.1
 
-### Stable tag
+###### Stable tag
 1.0
 
-### License
+###### License
 GPLv2 or later
 
-### License URI
+###### License URI
 http://www.gnu.org/licenses/gpl-2.0.html
-
-Grab your Ecwid products and categories into a variety of WordPress widgets, including a slider, a popup, and an accordion.
 
 Description
 -----------
@@ -47,14 +47,15 @@ Frequently Asked Questions
 ### The plugin won't work.  Why?
 Make sure you have an ecwid store with an account that allows API access.  This may mean you need a paid ecwid account.
 
-### Does this plugin makes me site really slow?
-Only for one page load.  It calls Ecwid, gets your store data, and saves it locally for future use.
+### Does this plugin makes my site really slow?
+Only for one page load.  It calls Ecwid, gets your store data, and caches it locally for future use.
 
 ### A cache?  What if I make changes to my products in Ecwid.com?
 You'll need to dump your cached data in order to see those changes.  There are three ways to do that:
-1. Wait a few hours.  The cache resets each day.
-2. Click the button to dump your cache in the plugin settings page.
-3. Save or re-save any widget from this plugin. 
+
+1. Wait a few hours.  The cache resets each day
+2. Click the button to dump your cache in the plugin settings page
+3. Save or re-save any widget from this plugin
 
 ### The accordion widget shows some products multiple times.  This is dumb.
 It loops through all your categories, and shows all the products in each category.  If a product is in multiple categories, it will appear multiple times.
