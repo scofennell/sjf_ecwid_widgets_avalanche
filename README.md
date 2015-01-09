@@ -47,19 +47,19 @@ Frequently Asked Questions
 ### The plugin won't work.  Why?
 Make sure you have an ecwid store with an account that allows API access.  This may mean you need a paid ecwid account.
 
-### Does this plugin makes me site really slow? =
+### Does this plugin makes me site really slow?
 Only for one page load.  It calls Ecwid, gets your store data, and saves it locally for future use.
 
-### A cache?  What if I make changes to my products in Ecwid.com? =
+### A cache?  What if I make changes to my products in Ecwid.com?
 You'll need to dump your cached data in order to see those changes.  There are three ways to do that:
 1. Wait a few hours.  The cache resets each day.
 2. Click the button to dump your cache in the plugin settings page.
 3. Save or re-save any widget from this plugin. 
 
-### The accordion widget shows some products multiple times.  This is dumb. =
+### The accordion widget shows some products multiple times.  This is dumb.
 It loops through all your categories, and shows all the products in each category.  If a product is in multiple categories, it will appear multiple times.
 
-### Some of these widgets don't do exactly what I want them to do. Can you change something? =
+### Some of these widgets don't do exactly what I want them to do. Can you change something?
 Probably!  Contact me at scofennell@gmail.com to inquire about custom work.
 
 Screenshots
