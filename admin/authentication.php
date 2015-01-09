@@ -275,7 +275,7 @@ class SJF_Ecwid_Auth {
 		
 		$url = $base . "?client_id=$client_id&redirect_uri=$redirect_uri&response_type=$response_type&scope=$scope";
 
-		$click_here = esc_html__( 'Connect this plugin to your store.', 'sjf-et' );
+		$click_here = esc_html__( 'Connect this plugin to your store', 'sjf-et' );
 
 		$link = "<a class='button button-primary $namespace-auth-link' href='$url'>$click_here</a>";
 

@@ -11,7 +11,8 @@
  * Domain Path: /lang
  *
  * @todo get ecwid to fix my app URL & intro paragraph
- * @todo readme.md
+ * @todo grab screenshots from widget settings screen
+ * @todo test doing_transients function more rigorously in ecwid class
  */
 
 /*  Copyright 2014  Scott Fennell  (email : scofennell@gmail.com)
@@ -35,12 +36,12 @@ if ( ! defined( 'WPINC' ) ) { die; }
 
 // A constant to define the paths to our plugin folders.
 define( 'SJF_ET_FILE', __FILE__ );
-define( 'SJF_ET_PATH', trailingslashit( plugin_dir_path( __FILE__ ) ) );
+define( 'SJF_ET_PATH', trailingslashit( plugin_dir_path( SJF_ET_FILE ) ) );
 define( 'SJF_ET_ADMIN_PATH', SJF_ET_PATH . 'admin/' );
 define( 'SJF_ET_INC_PATH', SJF_ET_PATH . 'inc/' );
 
 // A constant to define the urls to our plugin folders.
-define( 'SJF_ET_URL', trailingslashit( plugin_dir_url( __FILE__ ) ) );
+define( 'SJF_ET_URL', trailingslashit( plugin_dir_url( SJF_ET_FILE ) ) );
 define( 'SJF_ET_ADMIN_URL', SJF_ET_URL . 'admin/' );
 define( 'SJF_ET_INC_URL', SJF_ET_URL . 'inc/' );
 

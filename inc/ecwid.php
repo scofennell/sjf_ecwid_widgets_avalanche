@@ -22,7 +22,7 @@ class SJF_Ecwid {
 	 * @return boolean If it's a get request and we are not in debug mode, return true. Else, false.
 	 */
 	private function doing_transients( $request_type ) {
-		if ( ( $request_type == 'GET' ) && ! WP_DEBUG ) {
+		if ( ( $request_type == 'GET' ) && ( ! WP_DEBUG || ! is_user_logged_in() ) ) {
 			return TRUE;
 		}
 		return FALSE;

@@ -31,7 +31,7 @@ class SJF_ET_Slider extends WP_Widget {
 			$namespace . '-slider',
 			
 			// Name.
-			sprintf( __( '%s: Product Slider', 'sjf-et' ), SJF_Ecwid_Helpers::get_plugin_title() ),
+			sprintf( __( '%s: Slider', 'sjf-et' ), SJF_Ecwid_Helpers::get_plugin_title() ),
 
 			// Args.
 			array(

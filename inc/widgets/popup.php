@@ -34,7 +34,7 @@ class SJF_ET_Popup extends WP_Widget {
 			$namespace . '-popup',
 
 			// Name.
-			sprintf( __( '%s: Product Popup Overlay', 'sjf-et' ), SJF_Ecwid_Helpers::get_plugin_title() ),
+			sprintf( __( '%s: Popup', 'sjf-et' ), SJF_Ecwid_Helpers::get_plugin_title() ),
 
 			// Args.
 			array(

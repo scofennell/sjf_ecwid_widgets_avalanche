@@ -48,7 +48,7 @@ Frequently Asked Questions
 Make sure you have an ecwid store with an account that allows API access.  This may mean you need a paid ecwid account.
 
 ###### Does this plugin makes my site really slow?
-Only for one page load.  It calls Ecwid, gets your store data, and caches it locally for future use.
+Only for one page load.  It calls Ecwid, gets your store data, and caches it locally for future use.  Unless you have WordPress in debug mode and you are logged in to the site.  Then it does not cache.
 
 ###### A cache?  What if I make changes to my products in Ecwid.com?
 You'll need to dump your cached data in order to see those changes.  There are three ways to do that:
@@ -66,21 +66,33 @@ Probably!  Contact me at scofennell@gmail.com to inquire about custom work.
 Screenshots
 -----------
 
-1. This is the plugin settings screen.  You must visit this screen after activating this plugin in order to connect your store.  You can return to this screen at any time to disconnect your store, or to dump your cache
+This is the plugin settings screen.  You must visit this screen after activating this plugin in order to connect your store.  You can return to this screen at any time to disconnect your store, or to dump your cache
 
 ![Settings screen](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-1.png)
 
-2. This is the slider widget.
+This is the slider widget.
 
 ![Settings screen](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-2.png)
 
-3. This is the popup widget.
+This is the popup widget.
 
 ![Settings screen](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-3.png)
 
-4. This is the accordion widget.
+This is the accordion widget.
 
 ![Settings screen](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-4.png)
+
+This is the slider widget in wp-admin.
+
+![Settings screen](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-5.png)
+
+This is the popup widget in wp-admin.
+
+![Settings screen](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-6.png)
+
+This is the accordion widget in wp-admin.
+
+![Settings screen](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-7.png)
 
 Changelog
 ---------
