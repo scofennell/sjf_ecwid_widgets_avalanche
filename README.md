@@ -1,4 +1,6 @@
-=== Ecwid Widgets Avalanche ===
+Ecwid Widgets Avalanche
+=======================
+
 Contributors: scofennell@gmail.com
 Tags: Ecwid, Ecommerce, E-Commerce, Online Store, Ecwid Slider, Ecwid Popup, Ecwid Accordion.
 Requires at least: 4.1
