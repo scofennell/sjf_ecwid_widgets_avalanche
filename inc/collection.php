@@ -7,9 +7,6 @@
  * Although we already have a wrapper class for calling ecwid, which this class uses,
  * this class expedites a certain type of ecwid call, which is to parse args for a collection of items,
  * such as products or categories, form the request, and format the response 
- *
- * @todo The request vars are hard coded here but instead they should be grabbed from the methods in browse.php.
- * @todo It's lame to rely on the REQUEST vars.  Should take args.
  * 
  * @package WordPress
  * @subpackage sjf-et
@@ -24,15 +21,20 @@ class SJF_Ecwid_Collection {
 	 */
 	public $route;
 
+	public $args = array();
+
 	/**
      * Adds actions for our class methods and parses instantiation args.
      *
      * When this class is instantiated, it expects a value for route.
      */
-    function __construct( $route ) {
+    function __construct( $route, $args = array() ) {
         
         // Set the value for route.
         $this -> route = $route;
+
+        // Set the args for our request.
+        $this -> args = $args;
 
     }
 
@@ -44,27 +46,28 @@ class SJF_Ecwid_Collection {
     function get_collection() {
 
     	$route = $this -> route;
+		$args = $this -> args;
 
     	// Our wrapper class for calling ecwid.
 		$ecwid = new SJF_Ecwid;
 
 		// Parse the arg for limiting the number of results.
-		if( isset( $_REQUEST['limit'] ) ) {
-			$limit = SJF_Ecwid_Formatting::alphanum_underscore_hyphen( $_REQUEST['limit'] );
+		if( isset( $args['limit'] ) ) {
+			$limit = SJF_Ecwid_Formatting::alphanum_underscore_hyphen( $args['limit'] );
 			$route = add_query_arg( array( 'limit' => $limit ), $route );
 		}
 
 		// Parse the arg for ordering the results.
 		$sortBy = 'ADDED_TIME_DESC';
-		if( isset( $_REQUEST['sortBy'] ) ) {
-			$sortBy = SJF_Ecwid_Formatting::alphanum_underscore_hyphen( $_REQUEST['sortBy'] );
+		if( isset( $args['sortBy'] ) ) {
+			$sortBy = SJF_Ecwid_Formatting::alphanum_underscore_hyphen( $args['sortBy'] );
 		}
 		$route = add_query_arg( array( 'sortBy' => $sortBy ), $route );
 
 		// Parse the arg for limiting results to a category.
 		$category = '';
-		if( isset( $_REQUEST['category'] ) ) {
-			$category = SJF_Ecwid_Formatting::alphanum_underscore_hyphen( $_REQUEST['category'] );
+		if( isset( $args['category'] ) ) {
+			$category = SJF_Ecwid_Formatting::alphanum_underscore_hyphen( $args['category'] );
 			if( ! empty( $category ) ) {
 				$route = add_query_arg( array( 'category' => $category ), $route );
 			}
@@ -72,18 +75,26 @@ class SJF_Ecwid_Collection {
 
 		// Parse the arg for limiting results to those that contain a given keyword.
 		$keyword = '';
-		if( isset( $_REQUEST['keyword'] ) ) {
-			$keyword = rawurldecode( $_REQUEST['keyword'] );
+		if( isset( $args['keyword'] ) ) {
+			$keyword = rawurldecode( $args['keyword'] );
 			if( ! empty( $keyword ) ) {
 				$route = add_query_arg( array( 'keyword' => $keyword ), $route );
 			}
 		}
 
-		// Parse the arg for offset (for pagination).
-		$offset = SJF_Ecwid_Pagination::get_offset();
-		$route = add_query_arg( array( 'offset' => $offset ), $route );
+		// Parse the arg for limiting results to those from a parent ID.  Allow '0' to be passed, since it means all root items.
+		$parent = '';
+		if( isset( $args['parent'] ) ) {
+			$parent = rawurldecode( $args['parent'] );
+			$route = add_query_arg( array( 'parent' => $parent ), $route );
+		}
 
 		$result = $ecwid -> call( $route );
+
+		if( is_wp_error( $result ) ) {
+			$error = new SJF_Ecwid_Errors;
+			return $error -> get_error_message( $result );
+		}
 
 		$out = json_decode( $result['body'], TRUE );
 

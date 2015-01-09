@@ -12,22 +12,18 @@
 
 class SJF_Ecwid_Helpers {
 
-	public static function get_plugin_data() {
-		return get_plugin_data( SJF_ET_FILE );
-	}
-
-	public static function get_plugin_title() {
-		$plugin_data = self::get_plugin_data();
-		return $plugin_data['Name'];
-	}
-
 	/**
-	 * [max_collection_count description]
-	 * @see http://api.ecwid.com/#search-products
-	 * @return [type] [description]
+	 * Get the plugin name from the php docblock, falling back to a hardcoded value here if needed.
+	 * 
+	 * @return string The plugin name.
 	 */
-	public static function max_collection_count() {
-		return 100;
+	public static function get_plugin_title() {
+		if ( function_exists( 'get_plugin_data' ) ) {
+			$plugin_data = get_plugin_data( SJF_ET_FILE );
+			return $plugin_data['Name'];
+		} else {
+			return 'Ecwid Widgets Avalanche';
+		}
 	}
 
 	/**
@@ -40,12 +36,39 @@ class SJF_Ecwid_Helpers {
 	}
 
 	/**
-	 * Grab the auth token for this store and our plugin.
+	 * Grab the name for the auth token from ecwid.com.
 	 * 
-	 * @return string A 32-char string that gets generated when the user authorizes our plugin for their store.
+	 * @return string The name for the auth token from ecwid.com.
 	 */
+	public static function get_store_id_name() {
+		$namespace = self::get_namespace();
 	
+		return "$namespace-store_id";
 
+	}
+
+	/**
+	 * Get the ecwid ID for the store.
+	 * 
+	 * @return string The ecwid ID for the store.
+	 */
+	public static function get_store_id() {
+		return get_option( self::get_store_id_name() );
+	}
+
+	/**
+	 * Set the ecwid ID for the store.
+	 */
+	public static function set_store_id( $new_value ) {
+		$new_value = sanitize_text_field( $new_value );
+		return update_option( self::get_store_id_name(), $new_value );
+	}
+
+	/**
+	 * Grab the name for the auth token from ecwid.com.
+	 * 
+	 * @return string The name for the auth token from ecwid.com.
+	 */
 	public static function get_token_name() {
 		$namespace = self::get_namespace();
 	
@@ -53,36 +76,77 @@ class SJF_Ecwid_Helpers {
 
 	}
 
+	/**
+	 * Get the ecwid.com auth token.
+	 * 
+	 * @return string The ecwid.com auth token.
+	 */
 	public static function get_token() {
 		return get_option( self::get_token_name() );
 	}
 
+	/**
+	 * Save the ecwid.com auth token to the db.
+	 * 
+	 * @return boolean Returns a call to update_option.
+	 */
 	public static function set_token( $new_value ) {
 		$new_value = sanitize_text_field( $new_value );
 		return update_option( self::get_token_name(), $new_value );
 	}
 
-	public static function is_authorized() {
+	/**
+	 * Determine if the plugin is authorized to ecwid.com.
+	 *
+	 * @param int $attempt The number of attempts made thus far.
+	 * @return boolean If authorized, returns true, else false.
+	 */
+	public static function is_authorized( $attempt = 1 ) {
 		
+		$max_attempts = 5;
+
+		// If this call exceeds the limit, bail.
+		if( $attempt > $max_attempts ) {
+			return FALSE;
+		}
+
 		// If the token is empty, we know they are not authorized.
 		$token = self::get_token();
 		if( empty( $token ) ) {
 			return FALSE;
 		}
 		
-		// Test the response code from ecwid.  If it's 403 or 402, we know there is something wrong with their account.
+		// Get a response from ecwid.
 		$response = self::get_ecwid_response();
+
+		// If something weird happened, bail.
+		if( ! is_int( $response ) ) {
+			return FALSE;
+		}
+
+		// Test the response code from ecwid.  If it's 403 or 402, we know there is something wrong with their account.
 		if( ( $response == '403' ) || ( $response == '402' ) ) {
 			return FALSE;
+		}
+
+		// Test the response code from ecwid.  If it's 400 or 500, maybe we just need to try again.
+		if( ( $response == '400' ) || ( $response == '500' ) ) {
+			$attempt++;
+			return self::is_authorized( $attempt );
 		}
 
 		return TRUE;
 	}
 
+	/**
+	 * Ping ecwid.com to determine the response code.
+	 * 
+	 * @return int an HTTP response code.
+	 */
 	public static function get_ecwid_response() {
 
-		$ecwid = new SJF_Ecwid();
-		$test_ping = $ecwid -> call( 'profile' );
+		$ecwid         = new SJF_Ecwid();
+		$test_ping     = $ecwid -> call( 'profile' );
 		$response_code = $test_ping['response']['code'];
 		return $response_code;
 	
@@ -107,15 +171,6 @@ class SJF_Ecwid_Helpers {
 	}
 
 	/**
-	 * Get the ecwid ID for the store.
-	 * 
-	 * @return string The ecwid ID for the store.
-	 */
-	public static function get_store_id() {
-		return SJF_Ecwid_Formatting::alphanum( self::get_setting( 'store_id' ) );
-	}
-
-	/**
 	 * Get the prefix for the plugin options.
 	 * 
 	 * @return string The prefix for the plugin options.
@@ -134,29 +189,6 @@ class SJF_Ecwid_Helpers {
 	public static function get_setting( $slug ) {
 		$settings = get_option( self::get_settings_prefix() );
 		return $settings[ $slug ];
-	}
-
-	/**
-	 * Get the parts of Ecwid that our app wants permission to touch.
-	 *
-	 * This is presented to the user when they authorize the app.
-	 * 
-	 * @return array The parts of Ecwid that our app wants permission to touch.
-	 */
-	public static function get_scopes() {
-		return array(
-			'read_store_profile',
-			'update_store_profile',
-			'read_catalog',
-			'update_catalog',
-			'create_catalog',
-			'read_orders',
-			'update_orders',
-			'create_orders',
-			'read_customers',
-			'update_customers',
-			'create_customers',
-		);
 	}
 
 }

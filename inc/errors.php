@@ -13,7 +13,7 @@
 class SJF_Ecwid_Errors {
 
 	/**
-	 * Parse a wp error object into something more reaable for users.
+	 * Parse a wp error object into something more readable for users.
 	 * 
 	 * @param  object $wp_error A WP Error.
 	 * @return string An error message, wrapped and classed.
@@ -43,7 +43,7 @@ class SJF_Ecwid_Errors {
 		// If not empty, wrap and class the output.
 		if( ! empty( $out ) ) {
 
-			$header_label = esc_html__( 'Sorry, there has been an error.  More details:', 'sjf_et' );
+			$header_label = esc_html__( 'Sorry, there has been an error.  More details:', 'sjf-et' );
 			$header = "<h3>$header_label</h3>";
 			$out = "
 				<div class='$namespace-wp-error'>$header $out</div>

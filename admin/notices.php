@@ -19,12 +19,20 @@ Class SJF_Ecwid_Admin_Notices {
 		add_action( 'admin_notices', array( $this, 'the_notices' ) );
 	}
 
+	/**
+	 * Elsewhere in our plugin, we register admin boxes for this action.
+	 */
 	function the_notices() {
-
 		do_action( 'sjf_et_admin_notices' );
-
 	}
 
+	/**
+	 * A public method for outputting an admin notice.  Provides standard markup expected by WP.
+	 * 
+	 * @param  string $title   The title for the admin notice.
+	 * @param  string $content The content for the admin notice.
+	 * @param  array  $classes An array of CSS classes for the admin notice.
+	 */
 	public static function the_notice( $title = '', $content = '', $classes = array() ) {
 	
 		$namespace = SJF_Ecwid_Helpers::get_namespace();

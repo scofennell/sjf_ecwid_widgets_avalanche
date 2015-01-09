@@ -1,0 +1,150 @@
+/**
+ * Styles for our plugin widgets.
+ * 
+ * @package WordPress
+ * @subpackage sjf-et
+ * @since SJF ET 0.1
+ */
+
+/**
+ * I. Utilities
+ *     1. Hide Text
+ * 
+ * II. Modules
+ *     1. Accordion
+ *     2. Popup
+ *     3. Slider
+ */
+
+/**
+ * I. Utilities
+ */
+
+	/**
+	 * 1. Hide Text
+	 */
+	 .sjf_et-hide-text {
+	 	width: 1px; /* Keeps stuff invisible, but prevents it from being "faded out" in Chrome inspector.  For whatever that's worth. */
+	 	height: 1px;
+	 	overflow: hidden;
+	 	white-space: nowrap;
+	 	text-indent: 1em;
+	 	position: absolute;
+	 	z-index: -999;
+	 }
+
+/**
+ * II. Modules
+ */
+
+ 	/**
+ 	 * 1. Show/Hide
+ 	 */
+ 	
+	.sjf_et-toggle-parent {
+		position: relative;
+		padding-right: 1em; /* Leave room for the toggle button. */
+	}
+	.sjf_et-toggle {
+		position: absolute;
+		right: 0;
+		top: .6em;
+	}
+	.sjf_et-accordion-prods {
+		margin-left: 1em;
+	}
+
+	/**
+	 * 2. Popup
+	 */
+	
+	/* It is a widget, but probably should not get any theme widget styles related to box model. */
+	.widget_sjf_et-popup,
+	.widget.widget_sjf_et-popup {
+		padding: 0;
+		margin: 0;
+		border: 0;
+		background: none;
+	}
+	
+	/* The "shroud" that obscures the page body. */
+	.sjf_et-popup {
+		position: fixed;
+		left: 0;
+		top: 0;
+		height: 100%;
+		width: 100%;
+		background: rgba( 255, 255, 255, .5 );
+		z-index: 999;
+	}
+
+	/* The inner wrapper for the popup content. */
+	.sjf_et-popup-inner {
+		position: relative;
+		padding: 1em;
+		border-radius: .5em;
+		box-shadow: 0 0 1em rgba( 0, 0, 0, .25 );
+		max-width: 90%;
+		width: 400px;
+		margin: 2em auto;
+		text-align: center;
+		background: #fff;
+		overflow-y: auto;
+		overflow-x: hidden;
+		max-height: 90%;
+	}
+
+	.sjf_et-popup-image {
+		max-width: 100%;
+		width: 100%;
+		height: auto;
+		display: block;
+	} 
+
+	.sjf_et-popup-image,
+	.sjf_et-popup-title {
+		margin: 0 auto .5em;
+	}
+
+	.sjf_et-popup-close {
+		position: absolute;
+		right: 0em;
+		top: .025em;
+	}
+
+	.sjf_et-popup-close,
+	.sjf_et-popup-close .dashicons {
+		font-size: 36px;
+		line-height: 36px;
+		width: auto;
+	}
+
+	/**
+	 * 3. Slider
+	 */
+	.sjf_et-slide,
+	.sjf_et-slide-description,
+	.sjf_et-slide-image,
+	.sjf_et-slide-title {
+	 	margin: 0 0 .5em;
+	 	padding: 0;
+	}
+
+	.sjf_et-slide-image {
+		margin-left: auto;
+		margin-right: auto;
+		display: block;
+		max-width: 100%;
+		height: auto;
+	}
+
+	.bx-controls {
+		text-align: center;
+	}
+
+	.bx-controls-auto-item,
+	.bx-next,
+	.bx-pager-item {
+		display: inline-block;
+		padding: 0 .25em;
+	}

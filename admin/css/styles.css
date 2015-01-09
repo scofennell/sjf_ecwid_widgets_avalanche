@@ -1,0 +1,75 @@
+/**
+ * I. Modules
+ *    1.  Admin Notices
+ *    2.  Settings Page
+ */
+
+/**
+ * I. Modules
+ */
+
+	/**
+	 * 1. Admin Notices
+	 */
+	
+	.sjf_et-admin-notice-content {
+		margin: 0.5em 0;
+		padding: 2px;
+	}
+
+	.sjf_et-admin-notice-content a.sjf_et-auth-link {
+		display: inline-block;
+		margin: 0.5em 0;
+	}
+
+	.sjf_et-admin-notice-content > :last-child,
+	.sjf_et-admin-notice-content > :last-child > :last-child {
+		margin-bottom: 0;
+	}
+
+	/**
+	 * 2. Settings Page
+	 */
+
+	.sjf_et-settings {
+		margin-top: 20px;
+	}
+
+	a.button .dashicons {
+		vertical-align: text-bottom;
+	}
+
+	.sjf_et-settings-section {
+		border-bottom: 1px solid #ccc;
+		padding-top: 20px;
+		padding-bottom: 30px;
+		border-top: 1px solid #fff;
+	}
+
+	.sjf_et-settings-section table {
+		margin: 0;
+	}
+
+	.sjf_et-settings-section table tr:last-child > * {
+		margin-bottom: 0;
+		padding-bottom: 0;
+	}
+
+	.sjf_et-settings-section h3 {
+		margin: 0 0 10px;
+	}
+
+	.sjf_et-settings-section > :last-child {
+		padding-bottom: 0;
+		margin-bottom: 0;
+	}
+
+	.sjf_et-settings-section:first-child {
+		border-top: none;
+		padding-top: 0;
+	}
+
+	.sjf_et-settings-section:last-child {
+		padding-bottom: 0;
+		border-bottom: none;
+	}
