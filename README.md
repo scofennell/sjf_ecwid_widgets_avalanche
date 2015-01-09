@@ -67,15 +67,19 @@ Screenshots
 -----------
 
 1. This is the plugin settings screen.  You must visit this screen after activating this plugin in order to connect your store.  You can return to this screen at any time to disconnect your store, or to dump your cache
+
 ![Settings screen](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-1.png)
 
 2. This is the slider widget.
+
 ![Settings screen](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-2.png)
 
 3. This is the popup widget.
+
 ![Settings screen](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-3.png)
 
 4. This is the accordion widget.
+
 ![Settings screen](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-4.png)
 
 Changelog
