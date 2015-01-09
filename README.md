@@ -1,13 +1,26 @@
 Ecwid Widgets Avalanche
 =======================
 
-Contributors: scofennell@gmail.com
-Tags: Ecwid, Ecommerce, E-Commerce, Online Store, Ecwid Slider, Ecwid Popup, Ecwid Accordion.
-Requires at least: 4.1
-Tested up to: 4.1
-Stable tag: 1.0
-License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+### Contributors
+scofennell@gmail.com
+
+### Tags
+Ecwid, Ecommerce, E-Commerce, Online Store, Ecwid Slider, Ecwid Popup, Ecwid Accordion.
+
+### Requires at least
+4.1
+
+### Tested up to
+4.1
+
+### Stable tag
+1.0
+
+### License
+GPLv2 or later
+
+### License URI
+http://www.gnu.org/licenses/gpl-2.0.html
 
 Grab your Ecwid products and categories into a variety of WordPress widgets, including a slider, a popup, and an accordion.
 
