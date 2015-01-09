@@ -11,8 +11,6 @@
  * Domain Path: /lang
  *
  * @todo get ecwid to fix my app URL & intro paragraph
- * @todo grab screenshots from widget settings screen
- * @todo test doing_transients function more rigorously in ecwid class
  */
 
 /*  Copyright 2014  Scott Fennell  (email : scofennell@gmail.com)
