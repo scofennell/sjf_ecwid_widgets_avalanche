@@ -106,12 +106,25 @@ class SJF_Ecwid_Auth {
 		// We do a redir if the user clicks on the deauth link, so the UI updates as such.
 		add_action( 'admin_footer', array( $this, 'redir_script' ) );
 
+		// Maybe thank the user for being authorized.
+		$thank  = '';
+
+		$response_code = SJF_Ecwid_Helpers::get_ecwid_response();
+		if( $response_code == '402' ) {
+			$response = '<p>' . SJF_Ecwid_Helpers::get_ecwid_upgrade_prompt( array( 'button', 'button-primary' ) ) . '</p>';
+		} else {
+			$response = sprintf( __( 'Response from Ecwid: %s '), "<code>$response_code</code>", 'sjf-et' );
+		} 
+
 		// If the user is authorized, thank them and give them a deauth link.
 		if ( SJF_Ecwid_Helpers::is_authorized() ) {
 			
 			$connect_notes = '<p>' . esc_html__( 'This plugin needs to be connected to your store in order to work.  Right now, it is connected.', 'sjf-et' ) . '</p>';
 			$link = $this -> deauth_link();
 			
+			// Maybe thank the user for being authorized.
+			$thank  = $this -> thank();
+
 		// If the user is not authorized, try to authorize them, or prompt them to authorize.
 		} else {
 
@@ -134,12 +147,11 @@ class SJF_Ecwid_Auth {
 			</p>
 		";
 
-		// Maybe thank the user for being authorized.
-		$thank  = $this -> thank();
-
 		$out = "
 			<div class='$namespace-settings-section'>
 				$header
+				$response
+				$connect_notes
 				$link
 				$thank
 			</div>
@@ -156,15 +168,28 @@ class SJF_Ecwid_Auth {
 	 */
 	function thank() {
 
-		$token = SJF_Ecwid_Helpers::get_token();
-		
+		$out = '';
+
 		$namespace = SJF_Ecwid_Helpers::get_namespace();
 
-		if( empty( $token ) ) { return FALSE; }
+		$store_name = SJF_Ecwid_Helpers::get_store_name();
+		if( empty( $store_name ) ) { return FALSE; }
+		$out .= '<h3>' . sprintf( esc_html__( 'Welcome, %s', 'sjf-et' ), "$store_name" . '</h3>' );
 
-		$content = sprintf( esc_html__( 'Your Ecwid API token: %s', 'sjf-et' ), "<code>$token</code>" );
+		$store_logo = SJF_Ecwid_Helpers::get_store_logo();
+		if( ! empty( $store_logo ) ) {
+			$out .= $store_logo;
+		}
+
+		$token = SJF_Ecwid_Helpers::get_token();
+		if( empty( $token ) ) { return FALSE; }
+		$out .= '<p>' . sprintf( esc_html__( 'Your Ecwid API token: %s', 'sjf-et' ), "<code>$token</code>" . '</p>' );
+
+		$store_id = SJF_Ecwid_Helpers::get_store_id();
+		if( empty( $store_id ) ) { return FALSE; }
+		$out .= '<p>' . sprintf( esc_html__( 'Your Ecwid Store ID: %s', 'sjf-et' ), "<code>$store_id</code>" . '</p>' );
 		
-		$out = "<p class='$namespace-thank'>$content</p>";
+		$out = "<div class='$namespace-thank'>$out</div>";
 		
 		return $out;
 
@@ -321,6 +346,9 @@ class SJF_Ecwid_Auth {
 			
 		// Erase the token.
 		SJF_Ecwid_Helpers::set_token( '' );
+
+		// Erase any transients.
+		$transients = new SJF_Ecwid_Transients( FALSE );
 
 		// Erase the store id.
 		SJF_Ecwid_Helpers::set_store_id( '' );

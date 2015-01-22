@@ -64,7 +64,7 @@ class SJF_ET_Popup extends WP_Widget {
 		$this -> which_product = $which_product;
 
 		// Grab the cookie that is saved when the user closes the popup for this product.
-		$cookie = $this -> cookie_name( $which_product );
+		$cookie = $this -> get_cookie_name( $which_product );
 			
 		// If there is such a cookie, don't bother showing the popup again.
 		if( isset( $_COOKIE[ $cookie ] ) ) {
@@ -101,6 +101,8 @@ class SJF_ET_Popup extends WP_Widget {
 	 */
 	public function form( $instance ) {
 		
+		echo SJF_Ecwid_Helpers::get_nag();
+
 		$title         = ! empty( $instance['title'] ) ? $instance['title'] : '';
 		$which_product = ! empty( $instance['which_product'] ) ? $instance['which_product'] : '';
 		?>
@@ -185,6 +187,7 @@ class SJF_ET_Popup extends WP_Widget {
 
 	/**
 	 * Get a product popup.
+	 * 
 	 * @param  int $which_product An ecwid product ID.
 	 * @param  string $widget_title  The widget title, wrapped in theme html.
 	 * @param  string $before_widget The theme-defined html for pre-widget.
@@ -291,7 +294,7 @@ class SJF_ET_Popup extends WP_Widget {
 	 * @param  int $which_product An ecwid product ID.
 	 * @return string The name of the cookie for this product.
 	 */
-	function cookie_name( $which_product ) {
+	function get_cookie_name( $which_product ) {
 		
 		$namespace = SJF_Ecwid_Helpers::get_namespace();
 
@@ -313,7 +316,7 @@ class SJF_ET_Popup extends WP_Widget {
 		$which_product = $this -> which_product;
 
 		// Grab the cookie name for this product.
-		$cookie = $this -> cookie_name( $which_product );
+		$cookie = $this -> get_cookie_name( $which_product );
 
 		$namespace = SJF_Ecwid_Helpers::get_namespace();
 
@@ -337,6 +340,7 @@ class SJF_ET_Popup extends WP_Widget {
 
 	  			$( 'body' ).append( popup );
 
+	  			// When we click the close button or the overlay BG, close the popup and save a cookie.
 	  			$( [close, popup] ).each( function() {
 	  				$( this ).click( function( event ) {
 		  				event.preventDefault();
@@ -345,6 +349,7 @@ class SJF_ET_Popup extends WP_Widget {
 		  			});
 	  			});
 
+				// We want to be able to click the popup without triggering the call to fade it out.
 				$( '.sjf_et-popup-inner' ).click( function( event ) {
 					event.stopPropagation();
 				});

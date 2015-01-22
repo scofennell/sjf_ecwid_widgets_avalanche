@@ -79,6 +79,8 @@ class SJF_ET_Accordion extends WP_Widget {
 	 */
 	public function form( $instance ) {
 		
+		echo SJF_Ecwid_Helpers::get_nag();
+
 		$title = ! empty( $instance['title'] ) ? $instance['title'] : '';
 		
 		?>

@@ -95,12 +95,14 @@ class SJF_Ecwid_Admin {
 
 		$link = $this -> get_dump_cache_link();
 		$header = '<h3 $namespace-settings-section-header>' . esc_html__( 'Caching', 'sjf-et' ) . '</h3>';
-		$cache_notes = '<p>' . esc_html__( 'When this plugins grabs information from your store, it saves it to the WordPress transients cache. This cache is automatically cleared each day and when saving any Ecwid widget, but you can clear it now as well.', 'sjf-et' ) . '</p>';
-		
+		$cache_notes_1 = '<p>' . esc_html__( 'When this plugins grabs information from your store, it saves it to the WordPress transients cache. This cache is automatically cleared each day and when saving any Ecwid widget, but you can clear it now as well.', 'sjf-et' ) . '</p>';
+		$cache_notes_2 = '<p>' . esc_html__( ' If you are logged in and WordPress debug mode is on, caching will not occur.', 'sjf-et' ) . '</p>';
+
 		return "
 			<div class='$namespace-settings-section'>
 				$header
-				$cache_notes
+				$cache_notes_1
+				$cache_notes_2
 				<p class='$namespace-settings-section-submit submit'>
 					$link
 				</p>
@@ -166,12 +168,12 @@ class SJF_Ecwid_Admin {
 	 */
 	function get_notice() {
 		
-		// If you have a token, you're good to go.
-		$token = SJF_Ecwid_Helpers::get_token();		
-		if( ! empty( $token ) ) { return FALSE; }
-
 		// No need to show this if we are already on the settings page.
 		if ( SJF_Ecwid_Conditional_Tags::is_settings_page() ) { return FALSE; }
+
+		// The user needs a paid account.  If he already has one, don't nag him.
+		$response = SJF_Ecwid_Helpers::get_ecwid_response();
+		if( $response == '200' ) { return FALSE; }
 
 		$namespace = SJF_Ecwid_Helpers::get_namespace();
 
@@ -182,27 +184,7 @@ class SJF_Ecwid_Admin {
 		$title        = sprintf( esc_html__( 'Thanks for installing %s!', 'sjf-et' ), $plugin_link );
 
 		// Build the content of the admin notice.
-		$content = '';
-		
-		// Ping ecwid to see why we are not auth'd.
-		$response = SJF_Ecwid_Helpers::get_ecwid_response();
-	
-		// The user needs a paid account.
-		if( $response == '402' ) {
-
-			$content .= '<p>' . esc_html__( "You need a paid Ecwid account in order to use this plugin!", 'sjf-et' ) . '</p>';
-
-		// The user simply does not have a valid token.
-		} else {
-
-			$content = '<p>' . esc_html__( "Just authorize the plugin and you'll be all set!", 'sjf-et' ) . '</p>';
-
-		}
-
-		$auth = new SJF_Ecwid_Auth;
-
-		// Add an auth link to the content.
-		$content .= '<p>' .  $auth -> auth_link() . '</p>';
+		$content = SJF_Ecwid_Helpers::get_nag();
 
 		$out = SJF_Ecwid_Admin_Notices::the_notice( $title, $content );
 

@@ -73,7 +73,7 @@ class SJF_ET_Slider extends WP_Widget {
 		
 				} else {
 
-					$out = $this -> slider( $which_products, $instance['image_size'] );
+					$out = $this -> get_slider( $which_products, $instance['image_size'] );
 
 				}
 			}			
@@ -104,6 +104,8 @@ class SJF_ET_Slider extends WP_Widget {
 	 */
 	public function form( $instance ) {
 		
+		echo SJF_Ecwid_Helpers::get_nag();
+
 		$title          = ! empty( $instance['title'] ) ? $instance['title'] : '';
 		$image_size     = ! empty( $instance['image_size'] ) ? $instance['image_size'] : '';
 		$which_products = ! empty( $instance['which_products'] ) ? $instance['which_products'] : array();
@@ -134,7 +136,6 @@ class SJF_ET_Slider extends WP_Widget {
 	 *
 	 * @param array $new_instance Values just sent to be saved.
 	 * @param array $old_instance Previously saved values from database.
-	 *
 	 * @return array Updated safe values to be saved.
 	 */
 	public function update( $new_instance, $old_instance ) {
@@ -143,46 +144,62 @@ class SJF_ET_Slider extends WP_Widget {
 		$trans = new SJF_Ecwid_Transients( FALSE );
 
 		$instance = array();
-		$instance['title'] = ( ! empty( $new_instance['title'] ) ) ? strip_tags( $new_instance['title'] ) : '';
+		$instance['title']          = ( ! empty( $new_instance['title'] ) ) ? strip_tags( $new_instance['title'] ) : '';
 		$instance['which_products'] = ( ! empty( $new_instance['which_products'] ) ) ? array_map( 'absint', $new_instance['which_products'] ) : array();
-		$instance['image_size'] = ( ! empty( $new_instance['image_size'] ) ) ? sanitize_text_field( $new_instance['image_size'] ) : '';
+		$instance['image_size']     = ( ! empty( $new_instance['image_size'] ) ) ? sanitize_text_field( $new_instance['image_size'] ) : '';
 		
 		return $instance;
 	}
 
+	/**
+	 * Get products as HTML checkbox inputs.
+	 * 
+	 * @param  array $which_products An array of product ID's to power checked().
+	 * @param  string The name of the checkbox group.
+	 * @return string Products as HTML checkbox inputs.
+	 */
 	function get_products_as_checkboxes( $which_products, $name ) {
 
 		$out = '';
 
 		$namespace = SJF_Ecwid_Helpers::get_namespace();
 
+		// Get all products.
 		$collection = new SJF_Ecwid_Collection( 'products' );
-
 		$result = $collection -> get_collection();
-	
 		$items = $result['items'];
-		
 		if( ! is_array( $items ) ) {
 			return FALSE;
 		}
 
+		// For each product...
 		foreach( $items as $item ) {
 
-			$href = esc_url( $item['url'] );
 			$title = esc_html( $item['name'] );
-			$id   = esc_attr( $item['id'] );
+			$id    = esc_attr( $item['id'] );
 
+			// The input name for this checkbox.
 			$this_name = $name . "[$id]";
 
+			// Determine if this checkbox should be pre-checked.
 			$checked = '';
 			if( isset( $which_products[ $id ] ) ) {
 				$checked = checked( $which_products[ $id ], 1, FALSE );
 			}
 
-			$out .= "<li class='$namespace-checkbox-prods'><label><input $checked name='$this_name' value='1' type='checkbox'>$title</label></li>";
+			// Wrap each input in a label and a list item.
+			$out .= "
+				<li class='$namespace-checkbox-prods'>
+					<label>
+						<input $checked name='$this_name' value='1' type='checkbox'>
+						$title
+					</label>
+				</li>
+			";
 
 		}
 
+		// If there were products, wrap them in a list.
 		if( ! empty( $out ) ) {
 			$out = "<ul class='$namespace-checkbox-prod'>$out</ul>";
 		}
@@ -191,10 +208,18 @@ class SJF_ET_Slider extends WP_Widget {
 
 	}
 
+	/**
+	 * Get the ecwid image sizes as a select menu.
+	 * 
+	 * @param  string $image_size The currently selected size, to power selected().
+	 * @param  string $name       The name for this input.
+	 * @return string             The ecwid image sizes as a select menu.
+	 */
 	function get_image_sizes_as_dropdown( $image_size, $name ) {
 
 		$out = '';
 
+		// It's a pity this doesn't ship as part of the Ecwid API.  Basically copy and pasted from the API docs here.
 		$sizes = array(
 			'thumbnailUrl'      => esc_html__( 'Thumbnail: Size defined in store settings.', 'sjf-et' ),
 			'imageUrl'          => esc_html__( 'Image: 500px x 500px, soft crop.', 'sjf-et' ),
@@ -202,6 +227,7 @@ class SJF_ET_Slider extends WP_Widget {
 			'originalImageUrl'  => esc_html__( 'Original: Not resized.', 'sjf-et' ),
 		);
 
+		// For each image size, build an option and check for selected().
 		foreach( $sizes as $k => $v ) {
 
 			$selected = selected( $image_size, $k, FALSE );
@@ -210,6 +236,7 @@ class SJF_ET_Slider extends WP_Widget {
 
 		}
 
+		// If there were options, wrap them in a select.
 		if( ! empty( $out ) ) {
 			$out = "<select name='$name'>$out</select>";
 		}
@@ -218,7 +245,12 @@ class SJF_ET_Slider extends WP_Widget {
 
 	}
 
-	function slider_class() {
+	/**
+	 * Get the HTML class for our slider.
+	 * 
+	 * @return string The HTML class for our slider.
+	 */
+	function get_slider_class() {
 		
 		$namespace = SJF_Ecwid_Helpers::get_namespace();
 		
@@ -226,7 +258,14 @@ class SJF_ET_Slider extends WP_Widget {
 	
 	}
 
-	function slider( $which_products, $image_size ) {
+	/**
+	 * Get the product slider.
+	 * 
+	 * @param  array $which_products An array of product IDs.
+	 * @param  string $image_size The name of an ecwid image size.
+	 * @return string A product slider.
+	 */
+	function get_slider( $which_products, $image_size ) {
 
 		// Make sure we have some products to loop through.
 		$which_products = array_keys( $which_products );
@@ -244,11 +283,12 @@ class SJF_ET_Slider extends WP_Widget {
 		$namespace = SJF_Ecwid_Helpers::get_namespace();
 
 		// A class for the sldier module.
-		$slider_class = $this -> slider_class();
+		$slider_class = $this -> get_slider_class();
 
 		// A class for each slide.
 		$slide_class = "$namespace-slide";
 
+		// For each product ID, make a remote request (I know, right?) and add a slide to the slider.
 		foreach( $which_products as $which_product ) {
 
 			/**
@@ -350,7 +390,7 @@ class SJF_ET_Slider extends WP_Widget {
 
 		$namespace = SJF_Ecwid_Helpers::get_namespace();
 
-		$slider_class = $this -> slider_class();
+		$slider_class = $this -> get_slider_class();
 
 		// Build custom next arrow.
 		$next_text = esc_html__( 'Next', 'sjf-et' );

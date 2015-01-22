@@ -20,7 +20,7 @@ class SJF_Ecwid_Transients {
 	 * 
 	 * @param string $request_type GET, POST, DELETE, PUT, etc.
 	 */
-	public function __construct( $request_type ) {
+	public function __construct( $request_type = 'GET' ) {
 
 		// Unless it's a GET, flush transients.
 		if( $request_type != 'GET' ) {

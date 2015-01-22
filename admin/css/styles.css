@@ -2,6 +2,9 @@
  * I. Modules
  *    1.  Admin Notices
  *    2.  Settings Page
+ *
+ * II. Widget Forms
+ *    1.  Upgrade Nags
  */
 
 /**
@@ -72,4 +75,15 @@
 	.sjf_et-settings-section:last-child {
 		padding-bottom: 0;
 		border-bottom: none;
+	}
+
+/**
+ * II. Widget Forms
+ */
+
+ 	/**
+ 	 * 1. Upgrade Nags
+ 	 */
+	.widget-content .sjf_et-upgrade_link {
+		color: red;
 	}

@@ -1,4 +1,4 @@
-Ecwid Widgets Avalanche
+Widgets Avalanche for Ecwid
 =======================
 
 Grab your Ecwid products and categories into a variety of WordPress widgets, including a slider, a popup, and an accordion.
@@ -16,7 +16,7 @@ Ecwid, Ecommerce, E-Commerce, Online Store, Ecwid Slider, Ecwid Popup, Ecwid Acc
 4.1
 
 ###### Stable tag
-1.0
+1.1
 
 ###### License
 GPLv2 or later
@@ -96,6 +96,9 @@ This is the accordion widget in wp-admin.
 
 Changelog
 ---------
+
+### 1.1
+Smarter welcome and error messages for new accounts.
 
 ### 1.0
 Initial release.
