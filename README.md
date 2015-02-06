@@ -16,7 +16,7 @@ Ecwid, Ecommerce, E-Commerce, Online Store, Ecwid Slider, Ecwid Popup, Ecwid Acc
 4.1
 
 ###### Stable tag
-1.1
+1.1.1
 
 ###### License
 GPLv2 or later
@@ -96,6 +96,9 @@ This is the accordion widget in wp-admin.
 
 Changelog
 ---------
+
+### 1.1.1
+Stop asking Ecwid for permissions we don't need.
 
 ### 1.1
 Smarter welcome and error messages for new accounts.

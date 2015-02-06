@@ -67,16 +67,16 @@ class SJF_Ecwid_Auth {
 	function get_scopes() {
 		return array(
 			'read_store_profile',
-			'update_store_profile',
+			//'update_store_profile',
 			'read_catalog',
-			'update_catalog',
-			'create_catalog',
-			'read_orders',
-			'update_orders',
-			'create_orders',
-			'read_customers',
-			'update_customers',
-			'create_customers',
+			//'update_catalog',
+			//'create_catalog',
+			//'read_orders',
+			//'update_orders',
+			//'create_orders',
+			//'read_customers',
+			//'update_customers',
+			//'create_customers',
 		);
 	}
 
