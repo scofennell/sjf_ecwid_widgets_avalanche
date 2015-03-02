@@ -37,3 +37,13 @@ require_once( SJF_ET_ADMIN_PATH . 'enqueue.php' );
  * Grab our admin notices.
  */
 require_once( SJF_ET_ADMIN_PATH . 'notices.php' );
+
+/**
+ * Grab our debug class.
+ */
+require_once( SJF_ET_ADMIN_PATH . 'debug.php' );
+
+/**
+ * Grab our documentation class.
+ */
+require_once( SJF_ET_ADMIN_PATH . 'documentation.php' );

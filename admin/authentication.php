@@ -20,7 +20,6 @@ class SJF_Ecwid_Auth {
 
     }
 
-
 	/**
 	 * The url to which we send the user in hopes that they will authorize our app.
 	 * 
@@ -103,9 +102,6 @@ class SJF_Ecwid_Auth {
 		
 		$namespace = SJF_Ecwid_Helpers::get_namespace();
 
-		// We do a redir if the user clicks on the deauth link, so the UI updates as such.
-		add_action( 'admin_footer', array( $this, 'redir_script' ) );
-
 		// Maybe thank the user for being authorized.
 		$thank  = '';
 
@@ -174,17 +170,13 @@ class SJF_Ecwid_Auth {
 
 		$store_name = SJF_Ecwid_Helpers::get_store_name();
 		if( empty( $store_name ) ) { return FALSE; }
-		$out .= '<h3>' . sprintf( esc_html__( 'Welcome, %s', 'sjf-et' ), "$store_name" . '</h3>' );
+		$out .= '<h4>' . sprintf( esc_html__( 'Welcome, %s', 'sjf-et' ), "$store_name" . '</h4>' );
 
 		$store_logo = SJF_Ecwid_Helpers::get_store_logo();
 		if( ! empty( $store_logo ) ) {
 			$out .= $store_logo;
 		}
-
-		$token = SJF_Ecwid_Helpers::get_token();
-		if( empty( $token ) ) { return FALSE; }
-		$out .= '<p>' . sprintf( esc_html__( 'Your Ecwid API token: %s', 'sjf-et' ), "<code>$token</code>" . '</p>' );
-
+	
 		$store_id = SJF_Ecwid_Helpers::get_store_id();
 		if( empty( $store_id ) ) { return FALSE; }
 		$out .= '<p>' . sprintf( esc_html__( 'Your Ecwid Store ID: %s', 'sjf-et' ), "<code>$store_id</code>" . '</p>' );
@@ -321,13 +313,16 @@ class SJF_Ecwid_Auth {
 		$store_id = SJF_Ecwid_Helpers::get_store_id();
 		if( empty( $store_id ) ) { return false; }
 
-		// If the user is not logged in, ecwid will "remember" that he is trying to get to this page once logged in.
-		$url = 'https://my.ecwid.com/cp/?place=apps:view=authorized';
+		// Grab the url to our settings page.
+		$url = SJF_Ecwid_Admin_Helpers::get_main_menu_url();
+
+		// Put a nonce on it.
+		$nonce_url = wp_nonce_url( $url, $namespace . '_deauth', $namespace . '_deauth' );
 
 		$click_here = esc_html__( 'Disconnect this plugin from your store.', 'sjf-et' );
 
 		$link = "
-			<a class='button $namespace-deauth-link' target='_blank' href='$url'>
+			<a class='button $namespace-deauth-link' href='$nonce_url'>
 				<span class='dashicons dashicons-dismiss'></span>
 				$click_here
 			</a>";
@@ -338,12 +333,22 @@ class SJF_Ecwid_Auth {
 
 	/**
 	 * Sniff the url to see if the user wants to deauth.  If so, erase the token and reload the page.
+	 * 
+	 * @return mixed If nonce fails, return false.
 	 */
 	function check_deauth() {
 
+		$namespace = SJF_Ecwid_Helpers::get_namespace();
+
 		// Only do this if we are trying to deauth.
-		if( ! isset( $_GET['deauth'] ) ) { return FALSE; }
-			
+		if ( ! isset( $_GET[ $namespace . '_deauth' ] ) ) {
+			return FALSE;
+		}
+
+		if( ! wp_verify_nonce( $_GET[ $namespace . '_deauth' ], $namespace . '_deauth' ) ) {
+			return FALSE;
+		}
+			 
 		// Erase the token.
 		SJF_Ecwid_Helpers::set_token( '' );
 
@@ -354,42 +359,13 @@ class SJF_Ecwid_Auth {
 		SJF_Ecwid_Helpers::set_store_id( '' );
 
 		// Redir the page.
-		$url = remove_query_arg( 'deauth' );
+		$url = remove_query_arg( $namespace . '_deauth' );
 		echo "
 			<script>
 				window.location.replace( '$url' );
 			</script>
 		";
 			
-	}
-
-	/**
-	 * A click handler for the deauth button: When that button is clicked, redir the page.
-	 */
-	function redir_script() {
-		
-		if( ! SJF_Ecwid_Conditional_Tags::is_settings_page() ) { return FALSE; }
-
-		$namespace = SJF_Ecwid_Helpers::get_namespace();
-		$link = "$namespace-deauth-link";
-		$redir = add_query_arg( array( 'deauth' => 1 ) );
-			
-		$out = <<<EOT
-			<script>
-				jQuery( document ).ready( function( $ ) {
-					
-					var link = $( ".$link " );
-
-					$( link ).click( function( event ) {
-						window.location.replace( '$redir' );
-					});
-
-					
-				});
-			</script>
-EOT;
-
-		echo $out;
 	}
 
 }

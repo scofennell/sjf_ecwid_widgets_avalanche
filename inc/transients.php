@@ -19,18 +19,21 @@ class SJF_Ecwid_Transients {
 	 * Any time we do a transient, we check the request type and maybe flush transients.
 	 * 
 	 * @param string $request_type GET, POST, DELETE, PUT, etc.
+	 * @param bool   $flush_rewrite_rules Do we want to also flush rewrite rules?
 	 */
-	public function __construct( $request_type = 'GET' ) {
+	public function __construct( $request_type = 'GET', $flush_rewrite_rules = TRUE ) {
 
-		// Unless it's a GET, flush transients.
+		// Unless it's a GET, flush transients and maybe flush rewrites..
 		if( $request_type != 'GET' ) {
-			$this -> flush_transients();
+			$this -> flush_transients( $flush_rewrite_rules );
+			
+			if( $flush_rewrite_rules ) { flush_rewrite_rules( TRUE ); }
 		}
 
 	}
 
 	/**
-	 * Performs an SQL DELETE query to remove transients.
+	 * Performs an SQL DELETE query to remove transients.  Also flushed rewrite rules.
 	 */
 	private function flush_transients() {
 

@@ -28,13 +28,17 @@ class SJF_ET_Popup extends WP_Widget {
 		
 		$namespace = SJF_Ecwid_Helpers::get_namespace();
 
+		add_shortcode( SJF_Ecwid_Formatting::get_class_name( __CLASS__ ), array( $this, 'shortcode' ) );
+
+		add_filter( 'SJF_Ecwid_Admin_Documentation_get_docs', array( $this, 'get_docs' ), 70 );
+
 		parent::__construct(
 
 			 // Base ID.
-			$namespace . '-popup',
+			SJF_Ecwid_Formatting::get_class_name( __CLASS__ ),
 
 			// Name.
-			sprintf( __( '%s: Popup', 'sjf-et' ), SJF_Ecwid_Helpers::get_plugin_title() ),
+			sprintf( __( '%s: Popup', 'sjf-et' ), SJF_Ecwid_Helpers::get_plugin_short_title() ),
 
 			// Args.
 			array(
@@ -45,6 +49,40 @@ class SJF_ET_Popup extends WP_Widget {
 	}
 
 	/**
+	 * Send the widget as a shortcode.
+	 * 
+	 * @param  array $atts An array of shortcode args.
+	 * @return string      The widget html output.
+	 */
+	public function shortcode( $atts ) {
+		
+		$namespace = SJF_Ecwid_Helpers::get_namespace();
+
+		$base_class = SJF_Ecwid_Formatting::get_class_name( __CLASS__ . '_'.  __FUNCTION__ );
+
+		$args = shortcode_atts( array(
+			'which_product' => '',
+			'title'         => '',
+			'before_title'  => "<h3 class='$base_class-title'>",
+			'after_title'   => '</h3>',
+			'before_widget' => "<div class='$base_class'>",
+			'after_widget'  => '</div>',
+		), $atts, __CLASS__ );
+	
+		if( empty( $args['which_product'] ) ) { return FALSE; }
+
+		$instance['which_product']= $args['which_product'];
+		$instance['title']= $args['title'];
+
+		$out = $this -> widget( $args, $instance, FALSE );
+
+		$out = apply_filters( __CLASS__ . '_' . __FUNCTION__, $out );
+
+		return $out;
+
+	}
+
+	/**
 	 * Front-end display of widget.
 	 *
 	 * @see WP_Widget::widget()
@@ -52,7 +90,7 @@ class SJF_ET_Popup extends WP_Widget {
 	 * @param array $args     Widget arguments.
 	 * @param array $instance Saved values from database.
 	 */
-	public function widget( $args, $instance ) {
+	public function widget( $args = array(), $instance = array(), $echo = TRUE  ) {
 
 		// We need to have chosen a product in order for this to be worthwhile.
 		if( ! isset( $instance['which_product'] ) ) {
@@ -86,9 +124,11 @@ class SJF_ET_Popup extends WP_Widget {
 		
 		if( ! $out ) { return FALSE; }
 		
-		$out = $before_widget . $out . $after_widget;
-
-		echo $out;
+		if( $echo ) {
+			echo $out;
+		} else {
+			return $out;
+		}
 
 	}
 
@@ -132,8 +172,12 @@ class SJF_ET_Popup extends WP_Widget {
 	 */
 	public function update( $new_instance, $old_instance ) {
 		
-		// When the transients class is initiated with a value of FALSE, it dumps caches.
-		$trans = new SJF_Ecwid_Transients( FALSE );
+		/**
+		 * When the transients class is initiated with a value of FALSE (first arg), it dumps caches.
+		 * However the second arg, FALSE, tells it not to dump rewrite rules, since that would break the
+		 * widget customizer screen.
+		 */
+		$trans = new SJF_Ecwid_Transients( FALSE, FALSE );
 
 		$instance = array();
 
@@ -159,6 +203,11 @@ class SJF_ET_Popup extends WP_Widget {
 		// Get all products.
 		$collection = new SJF_Ecwid_Collection( 'products' );
 		$result = $collection -> get_collection();
+		
+		if( ! isset ( $result['items'] ) ) {
+			return FALSE;
+		}
+
 		$items = $result['items'];
 		if( ! is_array( $items ) ) {
 			return FALSE;
@@ -200,6 +249,8 @@ class SJF_ET_Popup extends WP_Widget {
 
 		$namespace = SJF_Ecwid_Helpers::get_namespace();
 
+		$base_class = SJF_Ecwid_Formatting::get_class_name( __CLASS__ . '_' . __FUNCTION__ );
+
 		if( ! is_scalar( $which_product ) ) { return FALSE; }
 
 		// Get the product.
@@ -215,8 +266,8 @@ class SJF_ET_Popup extends WP_Widget {
 		// We're gonna need dashicons.
 		wp_enqueue_style( 'dashicons' );
 
-		// Get the popup script.
-		add_action( 'wp_footer', array( $this, 'popup_script' ) );
+		// We're gonna need the cookie script.
+		wp_enqueue_script( 'cookie' );
 
 		$href = esc_url( $result['url'] );
 		$name = esc_html( $result['name'] );
@@ -228,44 +279,44 @@ class SJF_ET_Popup extends WP_Widget {
 			$src = esc_url( $result[ 'imageUrl' ] );
 			if( ! empty( $src ) ) {
 				$img = "
-					<a class='$namespace-popup-image-link' href='$href'>
-						<img class='$namespace-popup-image' src='$src'>
+					<a class='$base_class-image-link' href='$href'>
+						<img class='$base_class-image' src='$src'>
 					</a>
 				";
 			}		
 		}
-		$img = apply_filters( "$namespace-popup-image-link", $img, $result );
+		$img = apply_filters(__CLASS__ . '_' . __FUNCTION__ . '_image', $img, $result );
 
 		$description = '';
 		if( isset( $result['description'] ) ) {
 			if( ! empty( $result['description'] ) ) {
 				$description = SJF_Ecwid_Formatting::get_words( $result['description'], 50 );
 				$description = "
-					<div class='$namespace-popup-description'>
+					<div class='$base_class-description'>
 						$description
 					</div>
 				";
 			}
 		}
-		$description = apply_filters( "$namespace-popup-description", $description, $result );
+		$description = apply_filters( __CLASS__ . '_' . __FUNCTION__ . '_description', $description, $result );
 
 		// Build a button to close the popup.
 		$close_icon  = '<span class="dashicons dashicons-dismiss"></span>';
 		$close_text  = esc_html__( 'Close', 'sjf-et' );
 		$close_label = "<span class='$namespace-hide-text'>$close_text</span> $close_icon";
-		$close_label = apply_filters( "$namespace-popup-close-label", $close_label, $result );
-		$close       = "<a href='#' class='$namespace-popup-close'>$close_label</a>";
+		$close_label = apply_filters( __CLASS__ . '_' . __FUNCTION__ . '_close_label', $close_label, $result );
+		$close       = "<a href='#' class='$base_class-close'>$close_label</a>";
 		
 		// Build the title.
 		$title = "
-			<h4 class='$namespace-popup-title'>
-				<a class='$namespace-popup-title-link' href='$href'>$name</a>
+			<h4 class='$base_class-title'>
+				<a class='$base_class-title-link' href='$href'>$name</a>
 			</h4>
 		";
-		$title = apply_filters( "$namespace-popup-title", $title, $result );
+		$title = apply_filters( __CLASS__ . '_' . __FUNCTION__ . '_title', $title, $result );
 
 		$inner = "
-			<div class='$namespace-popup-inner'>
+			<div class='$base_class-inner'>
 				$before_widget
 					$widget_title
 					$img
@@ -275,15 +326,16 @@ class SJF_ET_Popup extends WP_Widget {
 				$after_widget
 			</div>
 		";
-		$inner = apply_filters( "$namespace-popup-inner", $inner, $result );
+		$inner = apply_filters( __CLASS__ . '_' . __FUNCTION__ . '_inner', $inner, $result );
+
+		$cookie_name = $this -> get_cookie_name( $which_product );
 
 		$out = "
-			<div class='$namespace-popup'>
+			<div class='$base_class' data-cookie='$cookie_name'>
 				$inner
 			</div>
 		";
-		$out = apply_filters( "$namespace-popup", $out, $result );
-
+		$out = apply_filters( __CLASS__ . '_' . __FUNCTION__, $out, $result );
 		return $out;
 
 	}
@@ -300,66 +352,35 @@ class SJF_ET_Popup extends WP_Widget {
 
 		if( ! is_scalar( $which_product ) ) { return FALSE; }
 
-		$cookie_name = "$namespace-popup-cookie-$which_product";
+		$cookie_name = __CLASS__ .'_' .  __FUNCTION__ . '_' . $which_product;
 
-		$out = apply_filters( "$namespace-popup-cookie_name", $cookie_name, $which_product );
-
+		$out = apply_filters( __CLASS__ . '_' . __FUNCTION__, $cookie_name, $which_product );
 		return $out;
 	}
 
 	/**
-	 * Output some JS for the popup script.
+	 * Grab info about the popup shortcode.
+	 * 
+	 * @return string info about the popup shortcode.
 	 */
-	function popup_script() {
+	function get_docs( $in ) {
 
-		// Which product are we grabbing?
-		$which_product = $this -> which_product;
-
-		// Grab the cookie name for this product.
-		$cookie = $this -> get_cookie_name( $which_product );
+		$docs = new SJF_Ecwid_Admin_Documentation;
 
 		$namespace = SJF_Ecwid_Helpers::get_namespace();
 
-		// A class for the entire module.
-		$popup_class = "$namespace-popup";
+		$label = esc_html__( 'Popup Shortcode', 'sjf-et' );
 		
-		// A class for the close button.
-		$close_class = "$popup_class-close";
+		$content_1 = '<p>' . esc_html__( 'The popup shortcode can be used like this:', 'sjf-et') . '</p>'; 
+		$content_2 = '<p><code>[sjf_et_popup which_product="46093237"]</code></p>';
+		$content_3 = '<p>' . sprintf( esc_html__( 'You must specify a product, by ID number, or the shortcode will not output anything. In the above example, %s is a product ID number.', 'sjf-et' ), '<code>46093237</code>' ) . '</p>';
 
-		// We're gonna need the cookie script.
-		wp_enqueue_script( 'cookie' );
+		$content = $content_1 . $content_2 . $content_3;
 
-		$out = <<<EOT
-		<script>
+		$out = $docs -> get_doc( $label, __FUNCTION__, $content );
 
-			jQuery( document).ready( function( $ ) {
-	  			
-	  			var popup = $( '.$popup_class' );
+		return $in . $out;
 
-	  			var close = $( '.$close_class' );
-
-	  			$( 'body' ).append( popup );
-
-	  			// When we click the close button or the overlay BG, close the popup and save a cookie.
-	  			$( [close, popup] ).each( function() {
-	  				$( this ).click( function( event ) {
-		  				event.preventDefault();
-		  				$( popup ).fadeOut();
-		  				$.cookie( '$cookie', '1', { expires: 1 } );
-		  			});
-	  			});
-
-				// We want to be able to click the popup without triggering the call to fade it out.
-				$( '.sjf_et-popup-inner' ).click( function( event ) {
-					event.stopPropagation();
-				});
-
-
-			});
-		</script>
-EOT;
-
-		echo $out;
 
 	}
 

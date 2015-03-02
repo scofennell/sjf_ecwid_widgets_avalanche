@@ -2,6 +2,8 @@
  * I. Modules
  *    1.  Admin Notices
  *    2.  Settings Page
+ *    	i. Settings Page Basics
+ *    	ii. Debug & Documentation
  *
  * II. Widget Forms
  *    1.  Upgrade Nags
@@ -34,56 +36,129 @@
 	 * 2. Settings Page
 	 */
 
-	.sjf_et-settings {
-		margin-top: 20px;
-	}
+		/**
+		 * i. Settings Page Basics
+		 */
 
-	a.button .dashicons {
-		vertical-align: text-bottom;
-	}
+		.sjf_et-settings {
+			margin-top: 20px;
+		}
 
-	.sjf_et-settings-section {
-		border-bottom: 1px solid #ccc;
-		padding-top: 20px;
-		padding-bottom: 30px;
-		border-top: 1px solid #fff;
-	}
+		a.button .dashicons {
+			vertical-align: text-bottom;
+		}
 
-	.sjf_et-settings-section table {
-		margin: 0;
-	}
+		.sjf_et-settings-section {
+			border-bottom: 1px solid #ccc;
+			padding-top: 20px;
+			padding-bottom: 30px;
+			border-top: 1px solid #fff;
+		}
 
-	.sjf_et-settings-section table tr:last-child > * {
-		margin-bottom: 0;
-		padding-bottom: 0;
-	}
+		.sjf_et-settings-section table {
+			margin: 0;
+		}
 
-	.sjf_et-settings-section h3 {
-		margin: 0 0 10px;
-	}
+		.sjf_et-settings-section table tr:last-child > * {
+			margin-bottom: 0;
+			padding-bottom: 0;
+		}
 
-	.sjf_et-settings-section > :last-child {
-		padding-bottom: 0;
-		margin-bottom: 0;
-	}
+		.sjf_et-settings-section h3 {
+			margin: 0 0 10px;
+		}
 
-	.sjf_et-settings-section:first-child {
-		border-top: none;
-		padding-top: 0;
-	}
+		.sjf_et-settings-section > :last-child {
+			padding-bottom: 0;
+			margin-bottom: 0;
+		}
 
-	.sjf_et-settings-section:last-child {
-		padding-bottom: 0;
-		border-bottom: none;
-	}
+		.sjf_et-settings-section:first-child {
+			border-top: none;
+			padding-top: 0;
+		}
+
+		.sjf_et-settings-section:last-child {
+			padding-bottom: 0;
+			border-bottom: none;
+		}
+
+		/**
+		 * 2. Debug & Documentation Section
+		 */
+		.sjf_ecwid_admin_documentation_get_docs,
+		.sjf_et-settings-section > output.sjf_ecwid_admin_debug_get_reports,
+		output.sjf_ecwid_admin_debug_get_reports {
+			background: #fff;
+			border-radius: 1em;
+			padding: 2em;
+			display: block;
+			margin: 2em 0;
+		}
+
+		.sjf_et-settings-section div.sjf_ecwid_admin_documentation_get_docs:last-child {
+			padding-bottom: 1em;
+		}
+
+		.sjf_ecwid_admin_documentation_get_doc,
+		.sjf_ecwid_admin_debug_get_report {
+			margin: 0 0 1.5em;
+		}
+
+		.sjf_ecwid_admin_documentation_get_doc .sjf_et-toggle, 
+		.sjf_ecwid_admin_debug_get_report .sjf_et-toggle {
+			top: 0;
+			left: 0;
+			right: auto;
+		}
+
+		.sjf_ecwid_admin_documentation_get_report:last-child .sjf_et_doc-label,
+		.sjf_ecwid_admin_documentation_get_report:last-child, 
+		.sjf_ecwid_admin_debug_get_report:last-child .sjf_et_debug-label,
+		.sjf_ecwid_admin_debug_get_report:last-child {
+			margin-bottom: 0;
+		}
+
+		.sjf_ecwid_admin_documentation_get_doc-label,
+		.sjf_ecwid_admin_debug_get_report-label {
+			margin: 0 0 .5em 2.5em;
+		}
+
+		.sjf_ecwid_admin_documentation_get_doc-accordion,
+		.sjf_ecwid_admin_debug_var_dig-list {
+			background: #f1f1f1;
+			padding: 1em;
+			border-radius: 1em;
+			margin: 0 0 0 2em; 
+		}
+
+		.sjf_ecwid_admin_documentation_get_doc-pair,
+		.sjf_ecwid_admin_debug_get_report-pair {
+			margin: 0 0 1.5em 0;
+		}
+
+		.sjf_ecwid_admin_documentation_get_doc-key,
+		.sjf_ecwid_admin_debug_get_report-key {
+			margin: 0 0 .25em 0;
+		}
+
+		.sjf_ecwid_admin_documentation_get_doc-value,
+		.sjf_ecwid_admin_debug_get_report-value {
+			display: block;
+			max-width: 100%;
+			overflow-x: scroll;
+			padding: .75em 1em;
+			border-radius: .5em;
+			text-shadow: 1px 1px 0px #fff;
+		}
 
 /**
  * II. Widget Forms
  */
 
- 	/**
- 	 * 1. Upgrade Nags
- 	 */
+	/**
+	 * 1. Upgrade Nags
+	 */
 	.widget-content .sjf_et-upgrade_link {
 		color: red;
 	}

@@ -60,4 +60,63 @@ class SJF_Ecwid_Admin_Helpers {
 		return $url;
 	}
 
+	/**
+	 * Get categories as HTML checkbox inputs.
+	 * 
+	 * @param  string $route The route to the collection.
+	 * @param  array $which_members An array of member ID's to power checked().
+	 * @param  string The name of the checkbox group.
+	 * @return string Products as HTML checkbox inputs.
+	 */
+	public static function get_collection_as_checkboxes( $route, $which_members, $name ) {
+		
+		$out = '';
+
+		$namespace = SJF_Ecwid_Helpers::get_namespace();
+
+		// Get all products.
+		$collection = new SJF_Ecwid_Collection( $route );
+		$result = $collection -> get_collection();
+		$items = $result['items'];
+		if( ! is_array( $items ) ) {
+			return FALSE;
+		}
+
+		$route_class = sanitize_html_class( $route );
+
+		// For each product...
+		foreach( $items as $item ) {
+
+			$title = esc_html( $item['name'] );
+			$id    = esc_attr( $item['id'] );
+
+			// The input name for this checkbox.
+			$this_name = $name . "[$id]";
+
+			// Determine if this checkbox should be pre-checked.
+			$checked = '';
+			if( isset( $which_members[ $id ] ) ) {
+				$checked = checked( $which_members[ $id ], 1, FALSE );
+			}
+
+			// Wrap each input in a label and a list item.
+			$out .= "
+				<li class='$namespace-checkbox-$route_class'>
+					<label>
+						<input $checked name='$this_name' value='1' type='checkbox'>
+						$title
+					</label>
+				</li>
+			";
+
+		}
+
+		// If there were products, wrap them in a list.
+		if( ! empty( $out ) ) {
+			$out = "<ul class='$namespace-checkboxes-$route_class'>$out</ul>";
+		}
+
+		return $out;
+	}
+
 }

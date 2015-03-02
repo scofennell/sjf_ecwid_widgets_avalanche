@@ -13,6 +13,15 @@
 class SJF_Ecwid_Helpers {
 
 	/**
+	 * Get the plugin help url.
+	 * 
+	 * @return string The plugin help url.
+	 */
+	public static function get_help_href() {
+		return 'https://wordpress.org/plugins/ecwid-widgets-avalanche/';
+	}
+
+	/**
 	 * Get the plugin name from the php docblock, falling back to a hardcoded value here if needed.
 	 * 
 	 * @return string The plugin name.
@@ -24,6 +33,15 @@ class SJF_Ecwid_Helpers {
 		} else {
 			return 'Ecwid Widgets Avalanche';
 		}
+	}
+
+	/**
+	 * Get the plugin short name.
+	 * 
+	 * @return string The plugin short name.
+	 */
+	public static function get_plugin_short_title() {
+		return 'E.W. Avalanche';
 	}
 
 	/**
@@ -113,6 +131,9 @@ class SJF_Ecwid_Helpers {
 		// If we made it this far, we don't have it as a transient, and we need to grab it from ecwid.
 		$ecwid = new SJF_Ecwid();
 		$data  = $ecwid -> call( 'profile' );
+
+		if( is_wp_error( $data ) ) { return FALSE; }
+		if( ! isset( $data['response']['code'] ) ) { return FALSE; }
 		$code  = $data['response']['code'];
 		
 		// Grab the store profile and save it as a transient. 
@@ -138,7 +159,7 @@ class SJF_Ecwid_Helpers {
 	public static function get_store_name() {
 
 		// Grab the store profile.
-		$profile    = self::get_store_profile();
+		$profile = self::get_store_profile();
 		if( ! isset( $profile['settings'] ) ) { return FALSE; }
 		$settings = $profile['settings'];
 		
@@ -149,11 +170,31 @@ class SJF_Ecwid_Helpers {
 	}
 
 	/**
-	 * Get the ecwid store logo.
+	 * Get the ecwid store url.
 	 * 
-	 * @return string The ecwid logo, in an img tag.
+	 * @return string The ecwid store name.
 	 */
-	public static function get_store_logo() {
+	public static function get_store_url() {
+
+		// Grab the store profile.
+		$profile = self::get_store_profile();
+		if( ! isset( $profile['settings'] ) ) { return FALSE; }
+		$general_info = $profile['generalInfo'];
+		
+		// Dig down to the store name.
+		if( ! isset( $general_info['storeUrl'] ) ) {
+			return FALSE;
+		}
+		return esc_url( $general_info['storeUrl'] );
+
+	}
+
+	/**
+	 * Get the ecwid store logo src.
+	 * 
+	 * @return string The ecwid logo src.
+	 */
+	public static function get_store_logo_src() {
 		
 		$namespace = self::get_namespace();
 
@@ -170,6 +211,21 @@ class SJF_Ecwid_Helpers {
 		if( empty( $src ) ) { return FALSE; }
 		$src = esc_url( $src );
 
+		return $src;
+
+	}
+
+	/**
+	 * Get the ecwid store logo.
+	 * 
+	 * @return string The ecwid logo, in an img tag.
+	 */
+	public static function get_store_logo() {
+		
+		$namespace = self::get_namespace();
+
+		$src = self::get_store_logo_src();;
+
 		// Grab the store name for title attr.
 		$title      = self::get_store_name();
 		$title_attr = esc_attr( $title );
@@ -178,6 +234,72 @@ class SJF_Ecwid_Helpers {
 		$img = "<img class='$namespace-logo' src='$src' alt='$title'>";
 
 		return $img;
+
+	}
+
+	public static function get_store_locale() {
+		$namespace = self::get_namespace();
+
+		// Grab the store profile.
+		$profile    = self::get_store_profile();
+		if( ! isset( $profile['languages'] ) ) { return FALSE; }
+		$languages = $profile['languages'];
+		
+		// Dig down to the store locale.
+		if( ! isset( $languages['facebookPreferredLocale'] ) ) { return FALSE; }
+		$locale = $languages['facebookPreferredLocale'];
+
+		return $locale;
+	}
+
+	public static function get_store_account_nickname() {
+		$namespace = self::get_namespace();
+
+		// Grab the store profile.
+		$profile    = self::get_store_profile();
+		if( ! isset( $profile['account'] ) ) { return FALSE; }
+		$account = $profile['account'];
+		
+		// Dig down to the store locale.
+		if( ! isset( $account['accountNickName'] ) ) { return FALSE; }
+		$account_nickname = $account['accountNickName'];
+
+		return $account_nickname;
+	}
+
+	public static function get_store_account_email() {
+		$namespace = self::get_namespace();
+
+		// Grab the store profile.
+		$profile    = self::get_store_profile();
+		if( ! isset( $profile['account'] ) ) { return FALSE; }
+		$account = $profile['account'];
+		
+		// Dig down to the store locale.
+		if( ! isset( $account['accountEmail'] ) ) { return FALSE; }
+		$account_email = $account['accountEmail'];
+
+		return $account_email;
+	}
+
+	/**
+	 * Get the id for every category in the store.
+	 * 
+	 * @return array An array of category ids.
+	 */
+	public static function get_all_category_ids() {
+		
+		$out = array();
+
+		$collection     = new SJF_Ecwid_Collection( "categories" );
+		$get_cats       = $collection -> get_collection();
+		$all_categories = $get_cats['items'];
+		
+		foreach( $all_categories as $cat ) {
+			$out[]= $cat['id'];
+		}
+
+		return $out;
 
 	}
 
@@ -257,6 +379,11 @@ class SJF_Ecwid_Helpers {
 	
 	} 
 
+	/**
+	 * Nag the user to take action -- either to authenticate or upgrade.
+	 * 
+	 * @return string An html block messaging the user to either uath or upgrade his account.
+	 */
 	public static function get_nag() {
 		
 		$out = '';
@@ -285,6 +412,12 @@ class SJF_Ecwid_Helpers {
 
 	}
 
+	/**
+	 * Get a link prompting the user to upgrade his ecwid account.
+	 * 
+	 * @param  array  $classes An array of html classes to use for the link.
+	 * @return string Link prompting the user to upgrade his ecwid account.
+	 */
 	public static function get_ecwid_upgrade_prompt( $classes = array() ) {
 		
 		$namespace = self::get_namespace();
@@ -333,6 +466,25 @@ class SJF_Ecwid_Helpers {
 	public static function get_setting( $slug ) {
 		$settings = get_option( self::get_settings_prefix() );
 		return $settings[ $slug ];
+	}
+
+	/**
+	 * Get a toggle handle for our plugin-wide show/hide implementation.
+	 * 
+	 * @param  array  $classes An array of html classes to apply to the toggle.
+	 * @return string A toggle handle for our plugin-wide show/hide implementation. 
+	 */
+	public static function get_toggle( $classes = array() ) {
+		
+		$namespace = self::get_namespace();
+		
+		$classes = implode( ' ', array_map( 'sanitize_html_class', $classes ) );
+
+		$dashicon = "<span class='dashicons dashicons-arrow-down-alt'></span>";
+		$toggle   = "<a class='$namespace-toggle $classes' href='#'>$dashicon</a>";
+				
+		return $toggle;
+				
 	}
 
 }

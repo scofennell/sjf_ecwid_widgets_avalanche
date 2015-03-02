@@ -25,19 +25,53 @@ class SJF_ET_Accordion extends WP_Widget {
 		
 		$namespace = SJF_Ecwid_Helpers::get_namespace();
 
+		add_shortcode( SJF_Ecwid_Formatting::get_class_name( __CLASS__ ), array( $this, 'shortcode' ) );
+
+		add_filter( 'SJF_Ecwid_Admin_Documentation_get_docs', array( $this, 'get_docs' ), 20 );
+
 		parent::__construct(
 
 			// Base ID.
-			$namespace . '-accordion',
+			SJF_Ecwid_Formatting::get_class_name( __CLASS__ ),
 
 			// Name.
-			sprintf( __( '%s: Accordion', 'sjf-et' ), SJF_Ecwid_Helpers::get_plugin_title() ),
+			sprintf( __( '%s: Accordion', 'sjf-et' ), SJF_Ecwid_Helpers::get_plugin_short_title() ),
 
 			// Args.
 			array(
 				'description' => __( 'A list of products, by category, as an accordion show/hide.', 'sjf-et' ),
 			)
 		);
+
+	}
+
+	/**
+	 * Send the widget as a shortcode.
+	 * 
+	 * @param  array $atts An array of shortcode args.
+	 * @return string      The widget html output.
+	 */
+	public function shortcode( $atts ) {
+		
+		$namespace = SJF_Ecwid_Helpers::get_namespace();
+
+		$base_class = SJF_Ecwid_Formatting::get_class_name( __CLASS__ );
+
+		$args = shortcode_atts( array(
+			'title'         => '',
+			'before_title'  => "<h3 class='$base_class-title'>",
+			'after_title'   => '</h3>',
+			'before_widget' => "<div class='$base_class-wrapper'>",
+			'after_widget'  => '</div>',
+		), $atts, __CLASS__ );
+	
+		$instance['title']= $args['title'];
+
+		$out = $this -> widget( $args, $instance, FALSE );
+
+		$out = apply_filters( __CLASS__ . '_' . __FUNCTION__, $out );
+	
+		return $out;
 
 	}
 
@@ -49,14 +83,21 @@ class SJF_ET_Accordion extends WP_Widget {
 	 * @param array $args     Widget arguments.
 	 * @param array $instance Saved values from database.
 	 */
-	public function widget( $args, $instance ) {
+	public function widget( $args = array(), $instance = array(), $echo = TRUE ) {
 	
 		// The bulk of the widget -- a nested list of products and categories.
 		$out = $this -> get_categories_list();
 
-		$before_widget = $args['before_widget'];
-		$after_widget  = $args['after_widget'];
-		
+		$before_widget = '';
+		if( isset( $args['before_widget'] ) ) {
+			$before_widget = $args['before_widget'];
+		}
+
+		$after_widget = '';
+		if( isset( $args['after_widget'] ) ) {
+			$after_widget  = $args['after_widget'];
+		}
+
 		$title = '';
 		if ( ! empty( $instance['title'] ) ) {
 			$before_title = $args['before_title'];
@@ -66,7 +107,11 @@ class SJF_ET_Accordion extends WP_Widget {
 		
 		$out = $before_widget . $title . $out . $after_widget;
 
-		echo $out;
+		if( $echo ) {
+			echo $out;
+		} else {
+			return $out;
+		}
 
 	}
 
@@ -105,8 +150,12 @@ class SJF_ET_Accordion extends WP_Widget {
 	 */
 	public function update( $new_instance, $old_instance ) {
 		
-		// When the transients class is initiated with a value of FALSE, it dumps caches.
-		$trans = new SJF_Ecwid_Transients( FALSE );
+		/**
+		 * When the transients class is initiated with a value of FALSE (first arg), it dumps caches.
+		 * However the second arg, FALSE, tells it not to dump rewrite rules, since that would break the
+		 * widget customizer screen.
+		 */
+		$trans = new SJF_Ecwid_Transients( FALSE, FALSE );
 
 		$instance = array();
 		
@@ -124,6 +173,8 @@ class SJF_ET_Accordion extends WP_Widget {
 	function get_categories_list( $parent_cat = FALSE ) {
 
 		$namespace = SJF_Ecwid_Helpers::get_namespace();
+
+		$base_class = SJF_Ecwid_Formatting::get_class_name( __CLASS__ );
 
 		$out = '';
 
@@ -160,35 +211,34 @@ class SJF_ET_Accordion extends WP_Widget {
 			$name = esc_html( $cat['name'] );
 
 			// Build the linked title.
-			$linked_title = "<a class='$namespace-accordion-cat-title' href='$href'>$name</a>";
-			$linked_title = apply_filters( "$namespace-accordion-cat-title", $linked_title, $cat );					
+			$linked_title = "<a class='$base_class-cat-title' href='$href'>$name</a>";
+			$linked_title = apply_filters( __CLASS__ . '_' . __FUNCTION__ . '_linked_title', $linked_title, $cat );					
 
 			// Grab the product count.
 			$product_int   = absint( $cat['productCount'] );
 			$product_count = sprintf( esc_html__( '(%s)', 'sjf-et' ), $product_int );
-			$product_count = "<span class='$namespace-accordion-cat-product-count'>$product_count</span>";
-			$product_count = apply_filters( "$namespace-accordion-cat-product_count", $product_count, $cat );					
+			$product_count = "<span class='$base_class-cat-product-count'>$product_count</span>";
+			$product_count = apply_filters( __CLASS__ . '_' . __FUNCTION__ . '_product_count', $product_count, $cat );					
 
 			// Grab child cats recursively.
 			$child_cats = $this -> get_categories_list( $id );
-			$child_cats = apply_filters( "$namespace-accordion-cat-child_cats", $child_cats, $cat );					
+			$child_cats = apply_filters( __CLASS__ . '_' . __FUNCTION__ . '_child_cats', $child_cats, $cat );					
 
 			// Grab products that fall under this category.
 			$products = $this -> get_products_list( $id );
-			$products = apply_filters( "$namespace-accordion-cat-products", $products, $cat );					
+			$products = apply_filters( __CLASS__ . '_' . __FUNCTION__ . '_products', $products, $cat );					
 
 			// If there are products or child cats, provide a link to show them.
 			$toggle = '';
 			if( ! empty( $products ) || ! empty( $child_cats ) ) {
 	
-				$dashicon = "<span class='dashicons dashicons-arrow-down-alt'></span>";
-				$toggle   = "<a class='$namespace-toggle $namespace-accordion-cat-toggle' href='#'>$dashicon</a>";
-				$toggle   = apply_filters( "$namespace-accordion-cat-toggle", $toggle, $cat );
+				$toggle = SJF_Ecwid_Helpers::get_toggle( array( "$base_class-cat-toggle" ) );
+				$toggle = apply_filters( __CLASS__ . '_' . __FUNCTION__ . '_toggle', $toggle, $cat );
 			}
 
 			// Output this category with all the sub cats and products nested under it.
 			$this_cat = "
-				<li class='$namespace-accordion-cat $namespace-toggle-parent'>
+				<li class='$base_class-cat $namespace-toggle-parent'>
 					$linked_title
 					$product_count
 					$toggle 
@@ -196,7 +246,7 @@ class SJF_ET_Accordion extends WP_Widget {
 					$child_cats
 				</li>
 			";
-			$this_cat = apply_filters( "$namespace-accordion-cat", $this_cat, $cat );
+			$this_cat = apply_filters( __CLASS__ . '_' . __FUNCTION__ . '_cat', $this_cat, $cat );
 
 			$out .= $this_cat;
 			
@@ -207,24 +257,21 @@ class SJF_ET_Accordion extends WP_Widget {
 			// We're gonna need dashicons.
 			wp_enqueue_style( 'dashicons' );
 
-			// We're gonna need some JS to do show/hide.
-			add_action( 'wp_footer', array( $this, 'show_hide_script' ) );
-
 			// If this cat is udner a parent cat, hide it.
 			if( $parent_cat ) {
 
-				$out = "<ul class='$namespace-accordion-cats $namespace-accordion'>$out</ul>";
+				$out = "<ul class='$base_class-cats $base_class'>$out</ul>";
 
 			} else {
 	
-				$out = "<ul class='$namespace-accordion-cats'>$out</ul>";
+				$out = "<ul class='$base_class-cats'>$out</ul>";
 
 			}
 
 		}
 
-		$out = apply_filters( "$namespace-accordion-cats", $out );		
-
+		$out = apply_filters( __CLASS__ . '_' . __FUNCTION__, $out );
+		
 		return $out;
 
 	}
@@ -240,6 +287,8 @@ class SJF_ET_Accordion extends WP_Widget {
 		$out = '';
 
 		$namespace = SJF_Ecwid_Helpers::get_namespace();
+
+		$base_class = SJF_Ecwid_Formatting::get_class_name( __CLASS__ );
 
 		// Get the products.
 		$args = array(
@@ -261,13 +310,13 @@ class SJF_ET_Accordion extends WP_Widget {
 			// Build a link to that product.
 			$href = esc_url( $item['url'] );
 			$name = esc_html( $item['name'] );
-			$name = apply_filters( "$namespace-accordion-prod-name", $name, $item );
+			$name = apply_filters( __CLASS__ . '_' . __FUNCTION__ . '_name', $name, $item );
 
-			$product_link = "<a class='$namespace-accordion-prod-link' href='$href'>$name</a>";
-			$product_link = apply_filters( "$namespace-accordion-prod-link", $product_link, $item );
+			$product_link = "<a class='$base_class-prod-link' href='$href'>$name</a>";
+			$product_link = apply_filters( __CLASS__ . '_' . __FUNCTION__ . '_link', $product_link, $item );
 
 			$out .= "
-				<li class='$namespace-accordion-prod $namespace-accordion-prod-item'>
+				<li class='$base_class-prod $base_class-prod-item'>
 					$product_link
 				</li>
 			";
@@ -275,8 +324,8 @@ class SJF_ET_Accordion extends WP_Widget {
 		}
 
 		if( ! empty( $out ) ) {
-			$out = "<ul class='$namespace-accordion-prods $namespace-accordion'>$out</ul>";
-			$out = apply_filters( "$namespace-accordion-prods", $out );
+			$out = "<ul class='$base_class-prods $base_class'>$out</ul>";
+			$out = apply_filters( __CLASS__ . '_' . __FUNCTION__, $out );
 		}
 
 		return $out;
@@ -284,32 +333,28 @@ class SJF_ET_Accordion extends WP_Widget {
 	}
 
 	/**
-	 * Output some JS to power our show/hide.
+	 * Get info about the accordion shortcode.
+	 * 
+	 * @return string Info about the accordion shortcode.
 	 */
-	function show_hide_script() {
+	function get_docs( $in ) {
 
-		if( is_admin() ) { return FALSE; }
+		$docs = new SJF_Ecwid_Admin_Documentation;
 
 		$namespace = SJF_Ecwid_Helpers::get_namespace();
 
-		$out = <<<EOT
-			<script>
-				jQuery( document ).ready( function( $ ) {
-			        var hide = $( '.$namespace-accordion' );
-    				$( hide ).hide();
+		$label = esc_html__( 'Accordion Shortcode', 'sjf-et' );
+		
+		$content_1 = '<p>' . esc_html__( 'The accordion shortcode can be used like this:', 'sjf-et') . '</p>'; 
+		$content_2 = '<p><code>[sjf_et_accordion]</code></p>';
+		$content_3 = '<p>' . esc_html__( 'This shortcode does not feature any options.', 'sjf-et' ) . '</p>';
 
-    				var toggle = $( '.$namespace-toggle' );
-    				$( toggle ).click( function( event ) {
-    					event.preventDefault();
-    					$( this ).siblings( '.$namespace-accordion' ).slideToggle();
-    					$( this ).find( '.dashicons' ).toggleClass( 'dashicons-arrow-down-alt dashicons-arrow-up-alt' );
-    				});
+		$content = $content_1 . $content_2 . $content_3;
 
-    			});
-			</script>
-EOT;
+		$out = $docs -> get_doc( $label, __FUNCTION__, $content );
 
-		echo $out;
+		return $in . $out;
+
 	}
 
 }

@@ -9,11 +9,17 @@
 /**
  * I. Utilities
  *     1. Hide Text
+ *     2. Clear Float
+ *     3. Error State
+ *     4. Toggler
  * 
  * II. Modules
  *     1. Accordion
  *     2. Popup
  *     3. Slider
+ *     4. Autosuggest
+ *     5. Sortable
+ *     6. RSS
  */
 
 /**
@@ -22,8 +28,11 @@
 
 	/**
 	 * 1. Hide Text
+	 *
+	 * We include a class for jquery UI items.
 	 */
-	 .sjf_et-hide-text {
+	 .sjf_et-hide-text,
+	 .ui-helper-hidden-accessible {
 	 	width: 1px; /* Keeps stuff invisible, but prevents it from being "faded out" in Chrome inspector.  For whatever that's worth. */
 	 	height: 1px;
 	 	overflow: hidden;
@@ -33,14 +42,27 @@
 	 	z-index: -999;
 	 }
 
-/**
- * II. Modules
- */
+	/**
+	 * 2. Clear Float
+	 */
+	.sjf_et-clear:after {
+		content: "";
+		display: table;
+		clear: both;
+	}
 
- 	/**
- 	 * 1. Show/Hide
- 	 */
- 	
+	/**
+	 * 3. Error State
+	 */
+	.sjf_et-error [type='text'],
+	.sjf_et-error [type='search'] {
+		color: red;
+		transition: color 0.5s ease-in-out;
+	}
+
+	/**
+	 * 4. Toggler
+	 */
 	.sjf_et-toggle-parent {
 		position: relative;
 		padding-right: 1em; /* Leave room for the toggle button. */
@@ -49,26 +71,33 @@
 		position: absolute;
 		right: 0;
 		top: .6em;
+		text-decoration: none;
 	}
-	.sjf_et-accordion-prods {
-		margin-left: 1em;
-	}
+
+/**
+ * II. Modules
+ */
+
+ 	/**
+ 	 * 1. Accordion
+ 	 */
 
 	/**
 	 * 2. Popup
 	 */
 	
 	/* It is a widget, but probably should not get any theme widget styles related to box model. */
-	.widget_sjf_et-popup,
-	.widget.widget_sjf_et-popup {
+	.widget_sjf_et_popup,
+	.widget.widget_sjf_et_popup {
 		padding: 0;
 		margin: 0;
 		border: 0;
 		background: none;
+		position: static !important; /* twnetythirteen wants some widgets to be pos absolute, which breaks our popup. */
 	}
 	
 	/* The "shroud" that obscures the page body. */
-	.sjf_et-popup {
+	.sjf_et_popup_get_popup {
 		position: fixed;
 		left: 0;
 		top: 0;
@@ -79,7 +108,7 @@
 	}
 
 	/* The inner wrapper for the popup content. */
-	.sjf_et-popup-inner {
+	.sjf_et_popup_get_popup-inner {
 		position: relative;
 		padding: 1em;
 		border-radius: .5em;
@@ -94,26 +123,26 @@
 		max-height: 90%;
 	}
 
-	.sjf_et-popup-image {
+	.sjf_et_popup-image {
 		max-width: 100%;
 		width: 100%;
 		height: auto;
 		display: block;
 	} 
 
-	.sjf_et-popup-image,
-	.sjf_et-popup-title {
+	.sjf_et_popup-image,
+	.sjf_et_popup-title {
 		margin: 0 auto .5em;
 	}
 
-	.sjf_et-popup-close {
+	.sjf_et_popup_get_popup-close {
 		position: absolute;
 		right: 0em;
 		top: .025em;
 	}
 
-	.sjf_et-popup-close,
-	.sjf_et-popup-close .dashicons {
+	.sjf_et_popup_get_popup-close,
+	.sjf_et_popup_get_popup-close .dashicons {
 		font-size: 36px;
 		line-height: 36px;
 		width: auto;
@@ -122,15 +151,15 @@
 	/**
 	 * 3. Slider
 	 */
-	.sjf_et-slide,
-	.sjf_et-slide-description,
-	.sjf_et-slide-image,
-	.sjf_et-slide-title {
+	.sjf_et_slider-slide,
+	.sjf_et_slider-slide-description,
+	.sjf_et_slider-slide-image,
+	.sjf_et_slider-slide-title {
 	 	margin: 0 0 .5em;
 	 	padding: 0;
 	}
 
-	.sjf_et-slide-image {
+	.sjf_et_slider-slide-image {
 		margin-left: auto;
 		margin-right: auto;
 		display: block;
@@ -147,4 +176,139 @@
 	.bx-pager-item {
 		display: inline-block;
 		padding: 0 .25em;
+	}
+
+	/**
+	 * 4. Autosuggest
+	 */
+	.sjf_et_autosuggest * {
+		box-sizing: border-box;
+	}
+
+	.sjf_et_autosuggest-label {
+		float: left;
+		width: 2em;
+		position: relative;
+		top: .2em;
+	}
+
+	.sjf_et_autosuggest-dashicons-search {
+		font-size: 1.5em;
+		vertical-align: middle;
+	}
+
+	input.sjf_et_autosuggest-input[type='search'] {
+		float: right;
+		width: calc( 100% - 2.05em );
+		margin-bottom: .7em;
+		position: relative;
+		z-index: 100;
+		padding: 0;
+	}
+
+	.sjf_et_autosuggest-link {
+		opacity: .75;
+		display: block;
+		margin: .25em 0 .25em 2em;
+	}
+
+	li:first-child .sjf_et_autosuggest-link {
+		margin-top: 0;
+	}
+
+	li:last-child .sjf_et_autosuggest-link {
+		margin-bottom: 0;
+	}
+
+	.ui-state-focus .sjf_et_autosuggest-link,
+	.sjf_et_autosuggest-link:hover,
+	.sjf_et_autosuggest-link:focus { opacity: 1; }
+
+	.sjf_et_autosuggest-suggestions {
+		display: block;
+		width: calc( 100% ) !important;
+		z-index: 10;
+		clear: both;
+	}
+
+	.sjf_et_autosuggest-suggestions ul {
+		left: 0 !important;
+		top: 0 !important;
+	}
+
+	.sjf_et_autosuggest-suggestions li {
+		list-style: none;
+	}
+
+	/**
+	 * 5. Sortable
+	 */
+	
+	/**
+	 * We want the table to behave well in narrow screens.  Swipe right to see the overflow!
+	 */
+	.widget_sjf_et_sortable {
+		overflow-x: scroll;
+		max-width: 100%;
+	}
+
+	.sjf_et_sortable_get_sortable {
+		width: 100%;
+	}
+
+	.sjf_et_sortable_get_table_head-th,
+	.sjf_et_sortable_get_sortable-cell {
+		padding: .75em;
+	}
+
+	.sjf_et_sortable_get_table_head-th {
+		vertical-align: bottom;
+		white-space: nowrap;
+	}
+
+	.sjf_et_sortable_get_sortable-cell {
+		vertical-align: top;
+	}
+
+	.sjf_et_sortable_get_table_head-th-link {
+		font-weight: 600;
+	}
+
+	.sjf_et_sortable_get_table_head-th-link:hover .dashicons.sjf_et_sortable_get_table_head-dashicons,
+	.dashicons.sjf_et_sortable_get_table_head-dashicons {
+		vertical-align: middle;
+		display: inline-block;
+		text-decoration: none;
+	}
+
+	.sjf_et_sortable_get_sortable-cell-link,
+	.sjf_et_sortable_get_sortable-cell-image{
+		display: block;
+	}
+
+	/**
+	 * "Active" styles for sort headers.
+	 */
+	.headerSortDown .sjf_et_sortable_get_table_head-th-link,
+	.headerSortUp .sjf_et_sortable_get_table_head-th-link {
+		text-decoration: underline;
+	}
+
+	/**
+	 * 6. RSS
+	 */
+	
+	.sjf_et_rss_get_link {
+		display: block;
+		vertical-align: middle;
+	}
+
+	.sjf_et_rss_get_link:hover .dashicons,
+	.sjf_et_rss_get_link .dashicons {
+		vertical-align: top;
+		line-height: 1.25em;
+		height: auto;
+		font-size: 1.25em;
+		text-decoration: none;
+		padding-right: 1.25em;
 	}

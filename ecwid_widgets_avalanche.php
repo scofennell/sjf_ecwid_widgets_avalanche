@@ -4,7 +4,7 @@
  * Plugin Name: Widgets Avalanche for Ecwid
  * Plugin URI:  http://www.scottfennell.org/ecwid
  * Description: A host of widgets for integrating Ecwid with WordPress.
- * Version:     1.1.1
+ * Version:     1.5.3
  * Author:      Scott Fennell
  * Author URI:  http://www.scottfennell.org/
  * Text Domain: sjf-et
@@ -29,6 +29,9 @@
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) { die; }
+
+// Establish a value for plugin version to bust file caches.
+define( 'SJF_ET_VERSION', '1.5.3' );
 
 // A constant to define the paths to our plugin folders.
 define( 'SJF_ET_FILE', __FILE__ );
@@ -62,10 +65,16 @@ require_once( SJF_ET_INC_PATH . 'collection.php' );
 // Get the formatting functions (sanitization, array digs, etc).
 require_once( SJF_ET_INC_PATH . 'formatting.php' );
 
+// Get the RSS feed functions.
+require_once( SJF_ET_INC_PATH . 'feed.php' );
+
 // Get the widgets.
 require_once( SJF_ET_INC_PATH . 'widgets/accordion.php' );
 require_once( SJF_ET_INC_PATH . 'widgets/slider.php' );
 require_once( SJF_ET_INC_PATH . 'widgets/popup.php' );
+require_once( SJF_ET_INC_PATH . 'widgets/autosuggest.php' );
+require_once( SJF_ET_INC_PATH . 'widgets/sortable.php' );
+require_once( SJF_ET_INC_PATH . 'widgets/rss.php' );
 
 // If the user is in wp-admin, load the admin files.
 if( is_admin() ) {

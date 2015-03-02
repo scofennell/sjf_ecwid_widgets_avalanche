@@ -20,6 +20,8 @@ class SJF_Ecwid_Errors {
 	 */
 	function get_error_message( $wp_error ) {
 		
+		if( ! WP_DEBUG ) { return FALSE; }
+
 		$namespace = SJF_Ecwid_Helpers::get_namespace();
 		$out = '';
 

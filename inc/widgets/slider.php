@@ -25,13 +25,19 @@ class SJF_ET_Slider extends WP_Widget {
 		
 		$namespace = SJF_Ecwid_Helpers::get_namespace();
 
+		add_shortcode( SJF_Ecwid_Formatting::get_class_name( __CLASS__ ), array( $this, 'shortcode' ) );
+
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue' ) );
+
+		add_filter( 'SJF_Ecwid_Admin_Documentation_get_docs', array( $this, 'get_docs' ), 100 );
+
 		parent::__construct(
 
 			// Base ID.
-			$namespace . '-slider',
-			
+			SJF_Ecwid_Formatting::get_class_name(  __CLASS__ ),
+
 			// Name.
-			sprintf( __( '%s: Slider', 'sjf-et' ), SJF_Ecwid_Helpers::get_plugin_title() ),
+			sprintf( __( '%s: Slider', 'sjf-et' ), SJF_Ecwid_Helpers::get_plugin_short_title() ),
 
 			// Args.
 			array(
@@ -42,6 +48,75 @@ class SJF_ET_Slider extends WP_Widget {
 	}
 
 	/**
+	 * Grab our php variables for this widget and load them into our plugin-wide JS file.
+	 */
+	function enqueue() {
+		
+		$namespace = SJF_Ecwid_Helpers::get_namespace();
+
+		// The php vars for this widget.
+		$local = $this -> script();
+
+		// Send to the plugin-wide JS file.
+		wp_localize_script( $namespace . '_scripts', __CLASS__, $local );
+
+	}
+
+	/**
+	 * Send the widget as a shortcode.
+	 * 
+	 * @param  array $atts An array of shortcode args.
+	 * @return string      The widget html output.
+	 */
+	public function shortcode( $atts ) {
+		
+		$namespace = SJF_Ecwid_Helpers::get_namespace();
+
+		$base_class = SJF_Ecwid_Formatting::get_class_name( __CLASS__ . '_'.  __FUNCTION__ );
+		
+		$args = shortcode_atts( array(
+			'which_products' => '',
+			'image_size'     => 'imageUrl',
+			'title'          => '',
+			'before_title'   => "<h3 class='$base_class-title'>",
+			'after_title'    => '</h3>',
+			'before_widget'  => "<div class='$base_class'>",
+			'after_widget'   => '</div>',
+		), $atts, __CLASS__ );
+	
+		/**
+		 * Dealing with which_products is tricky since the shortcode expects
+		 * the product ID's as the array key, as that's how the are saved by
+		 * the form checkboxes.
+		 */
+		
+		// If there are no products specified, bail.
+		if( empty( $args['which_products'] ) ) {
+			return FALSE;
+		}
+
+		// Convert the comma-sep list into an array.
+		$which_products_array = explode( ',', $args['which_products'] );
+		
+		// Sanitize each member.
+		$which_products_san = array_map( 'absint', $which_products_array );
+		
+		// Read each value as a key.
+		$which_products_out = array_flip( $which_products_san );
+		
+		$instance['which_products']= $which_products_out;
+		$instance['title']= $args['title'];
+		$instance['image_size']= $args['image_size'];
+
+		$out = $this -> widget( $args, $instance, FALSE );
+
+		$out = apply_filters( __CLASS__ . '_' . __FUNCTION__, $out );
+
+		return $out;
+
+	}
+
+	/**
 	 * Front-end display of widget.
 	 *
 	 * @see WP_Widget::widget()
@@ -49,7 +124,7 @@ class SJF_ET_Slider extends WP_Widget {
 	 * @param array $args     Widget arguments.
 	 * @param array $instance Saved values from database.
 	 */
-	public function widget( $args, $instance ) {
+	public function widget( $args = array(), $instance = array(), $echo = TRUE  ) {
 	
 		if( ! isset( $instance['which_products'] ) ) {
 
@@ -91,7 +166,11 @@ class SJF_ET_Slider extends WP_Widget {
 		
 		$out = $before_widget . $title . $out . $after_widget;
 
-		echo $out;
+		if( $echo ) {
+			echo $out;
+		} else {
+			return $out;
+		}
 
 	}
 
@@ -112,17 +191,17 @@ class SJF_ET_Slider extends WP_Widget {
 
 		?>
 		<p>
-		<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:' ); ?></label> 
-		<input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>">
+			<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:' ); ?></label> 
+			<input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>">
 		</p>
 
 		<p>
-		<label for="<?php echo $this->get_field_id( 'which_products' ); ?>"><?php _e( 'Which Products:' ); ?></label> 
-			<?php echo $this -> get_products_as_checkboxes( $which_products, $this->get_field_name( 'which_products' ) ); ?>
+			<label for="<?php echo $this->get_field_id( 'which_products' ); ?>"><?php _e( 'Which Products:' ); ?></label> 
+			<?php echo SJF_Ecwid_Admin_Helpers::get_collection_as_checkboxes( 'products', $which_products, $this -> get_field_name( 'which_products' ) ); ?>
 		</p>
 
 		<p>
-		<label for="<?php echo $this->get_field_id( 'image_size' ); ?>"><?php _e( 'Image Size:' ); ?></label> 
+			<label for="<?php echo $this->get_field_id( 'image_size' ); ?>"><?php _e( 'Image Size:' ); ?></label> 
 			<?php echo $this -> get_image_sizes_as_dropdown( $image_size, $this->get_field_name( 'image_size' ) ); ?>
 		</p>
 
@@ -140,8 +219,12 @@ class SJF_ET_Slider extends WP_Widget {
 	 */
 	public function update( $new_instance, $old_instance ) {
 		
-		// When the transients class is initiated with a value of FALSE, it dumps caches.
-		$trans = new SJF_Ecwid_Transients( FALSE );
+		/**
+		 * When the transients class is initiated with a value of FALSE (first arg), it dumps caches.
+		 * However the second arg, FALSE, tells it not to dump rewrite rules, since that would break the
+		 * widget customizer screen.
+		 */
+		$trans = new SJF_Ecwid_Transients( FALSE, FALSE );
 
 		$instance = array();
 		$instance['title']          = ( ! empty( $new_instance['title'] ) ) ? strip_tags( $new_instance['title'] ) : '';
@@ -149,63 +232,6 @@ class SJF_ET_Slider extends WP_Widget {
 		$instance['image_size']     = ( ! empty( $new_instance['image_size'] ) ) ? sanitize_text_field( $new_instance['image_size'] ) : '';
 		
 		return $instance;
-	}
-
-	/**
-	 * Get products as HTML checkbox inputs.
-	 * 
-	 * @param  array $which_products An array of product ID's to power checked().
-	 * @param  string The name of the checkbox group.
-	 * @return string Products as HTML checkbox inputs.
-	 */
-	function get_products_as_checkboxes( $which_products, $name ) {
-
-		$out = '';
-
-		$namespace = SJF_Ecwid_Helpers::get_namespace();
-
-		// Get all products.
-		$collection = new SJF_Ecwid_Collection( 'products' );
-		$result = $collection -> get_collection();
-		$items = $result['items'];
-		if( ! is_array( $items ) ) {
-			return FALSE;
-		}
-
-		// For each product...
-		foreach( $items as $item ) {
-
-			$title = esc_html( $item['name'] );
-			$id    = esc_attr( $item['id'] );
-
-			// The input name for this checkbox.
-			$this_name = $name . "[$id]";
-
-			// Determine if this checkbox should be pre-checked.
-			$checked = '';
-			if( isset( $which_products[ $id ] ) ) {
-				$checked = checked( $which_products[ $id ], 1, FALSE );
-			}
-
-			// Wrap each input in a label and a list item.
-			$out .= "
-				<li class='$namespace-checkbox-prods'>
-					<label>
-						<input $checked name='$this_name' value='1' type='checkbox'>
-						$title
-					</label>
-				</li>
-			";
-
-		}
-
-		// If there were products, wrap them in a list.
-		if( ! empty( $out ) ) {
-			$out = "<ul class='$namespace-checkbox-prod'>$out</ul>";
-		}
-
-		return $out;
-
 	}
 
 	/**
@@ -246,19 +272,6 @@ class SJF_ET_Slider extends WP_Widget {
 	}
 
 	/**
-	 * Get the HTML class for our slider.
-	 * 
-	 * @return string The HTML class for our slider.
-	 */
-	function get_slider_class() {
-		
-		$namespace = SJF_Ecwid_Helpers::get_namespace();
-		
-		return "$namespace-slider";
-	
-	}
-
-	/**
 	 * Get the product slider.
 	 * 
 	 * @param  array $which_products An array of product IDs.
@@ -269,6 +282,7 @@ class SJF_ET_Slider extends WP_Widget {
 
 		// Make sure we have some products to loop through.
 		$which_products = array_keys( $which_products );
+
 		$count = count( $which_products );
 		if( empty( $count ) ) { return FALSE; }
 
@@ -278,15 +292,15 @@ class SJF_ET_Slider extends WP_Widget {
 		wp_enqueue_script( 'bxslider' );
 
 		// Grab our widget script to instantiate the bx slider.
-		add_action( 'wp_footer', array( $this, 'slider_script' ) );
+		add_action( 'wp_footer', array( $this, 'script' ) );
 
 		$namespace = SJF_Ecwid_Helpers::get_namespace();
 
 		// A class for the sldier module.
-		$slider_class = $this -> get_slider_class();
+		$slider_class = SJF_Ecwid_Formatting::get_class_name( __CLASS__ );
 
 		// A class for each slide.
-		$slide_class = "$namespace-slide";
+		$slide_class = $slider_class . '-slide';
 
 		// For each product ID, make a remote request (I know, right?) and add a slide to the slider.
 		foreach( $which_products as $which_product ) {
@@ -305,7 +319,6 @@ class SJF_ET_Slider extends WP_Widget {
 
 			$href  = esc_url( $result['url'] );
 			$title = esc_html( $result['name'] );
-			
 
 			// If this product has an image, build a linked image.
 			$linked_image = '';
@@ -317,7 +330,7 @@ class SJF_ET_Slider extends WP_Widget {
 					</a>
 				";
 
-				$linked_image = apply_filters( "$slide_class-image-link", $linked_image, $result );
+				$linked_image = apply_filters( __CLASS__ . '_' . __FUNCTION__ . '_linked_image', $linked_image, $result );
 
 			}
 
@@ -327,7 +340,7 @@ class SJF_ET_Slider extends WP_Widget {
 
 				$description = SJF_Ecwid_Formatting::get_words( $result['description'], 50 );
 					
-				$description = apply_filters( "$slide_class-description", $description, $result );
+				$description = apply_filters( __CLASS__ . '_' . __FUNCTION__ . '_description', $description, $result );
 
 				if( ! empty( $description ) ) {
 					$description = "
@@ -347,7 +360,7 @@ class SJF_ET_Slider extends WP_Widget {
 					</a>
 				</h4>
 			";
-			$linked_title = apply_filters( "$slide_class-title", $linked_title, $result );
+			$linked_title = apply_filters( __CLASS__ . '_' . __FUNCTION__ . '_linked_title', $linked_title, $result );
 
 			// Build the slide.
 			$slide = "
@@ -358,7 +371,7 @@ class SJF_ET_Slider extends WP_Widget {
 				</div>
 			";
 
-			$slide = apply_filters( "$slide_class", $slide, $result );
+			$slide = apply_filters( __CLASS__ . '_' . __FUNCTION__ . '_slide', $slide, $result );
 
 			$out .= "<li class='$slide_class'>$slide</li>";
 
@@ -373,45 +386,45 @@ class SJF_ET_Slider extends WP_Widget {
 			";
 		}
 
-		$out = apply_filters( "$slider_class", $out );
+		$out = apply_filters( __CLASS__ . '_' . __FUNCTION__, $out );
 
 		return $out;
 
 	}
 
 	/**
-	 * Output some JS to intatiate our slider.
-	 * @return [type] [description]
+	 * Turn PHP args for our slider into JS args.
 	 */
-	function slider_script() {
+	function script() {
 		
 		// We're gonna need dashicons.
 		wp_enqueue_style( 'dashicons' );
 
 		$namespace = SJF_Ecwid_Helpers::get_namespace();
 
-		$slider_class = $this -> get_slider_class();
+		$base_class = SJF_Ecwid_Formatting::get_class_name( __CLASS__ );
 
 		// Build custom next arrow.
 		$next_text = esc_html__( 'Next', 'sjf-et' );
 		$next      = "<span class='$namespace-hide-text'>$next_text</span><span class='dashicons dashicons-arrow-right'></span>";
-		$next      = apply_filters( $slider_class . '-next', $next );
+		$next      = apply_filters( __CLASS__ . '_' . __FUNCTION__ . '_next', $next );
 
 		// Build custom prev arrow.		
 		$prev_text = esc_html__( 'Previous', 'sjf-et' );
 		$prev      = "<span class='$namespace-hide-text'>$prev_text</span><span class='dashicons dashicons-arrow-left'></span>";
-		$prev      = apply_filters( $slider_class . '-prev', $prev );
+		$prev      = apply_filters( __CLASS__ . '_' . __FUNCTION__ . '_prev', $prev );
 
 		// Build custom stop button.
 		$stop_text = esc_html__( 'Stop', 'sjf-et' );
 		$stop      = "<span class='$namespace-hide-text'>$stop_text</span><span class='dashicons dashicons-controls-pause'></span>";
-		$stop      = apply_filters( $slider_class . '-stop', $stop );
+		$stop      = apply_filters( __CLASS__ . '_' . __FUNCTION__ . '_stop', $stop );
 
 		// Build custom play button.		
 		$play_text = esc_html__( 'Play', 'sjf-et' );
 		$play      = "<span class='$namespace-hide-text'>$play_text</span><span class='dashicons dashicons-controls-play'></span>";
-		$play      = apply_filters( $slider_class . '-play', $play );
+		$play      = apply_filters( __CLASS__ . '_' . __FUNCTION__ . '_play', $play );
 
+		// These are are used the the BX Slider.
 		$args = array(
 			'nextText'            => "$next",
 	  		'prevText'            => "$prev",
@@ -424,19 +437,47 @@ class SJF_ET_Slider extends WP_Widget {
 	  		'pause'               => 5000,
 		);
 
-		$args = apply_filters( $slider_class . '-args', $args );
+		// Let the user customize the options.
+		$args = apply_filters( __CLASS__ . '_' . __FUNCTION__ . '_args', $args );
 
-		$args_json = json_encode( $args );
+		// Turn the args into JSON.
+		$args = json_encode( $args );
 
-		$out = <<<EOT
-		<script>
-			jQuery( window ).load( function() {
-	  			jQuery( '.$slider_class' ).bxSlider( $args_json );
-			});
-		</script>
-EOT;
-		echo $out;
+		// Localize the args.
+		$local = array(
+			'args'  => $args,
+			'class' => $base_class,
+		);
 
+		// Return the localized version of the args so it can be used in a JS file.
+		return $local;
+
+	}
+
+
+	/**
+	 * Grab info about the blog itself.
+	 * 
+	 * @return string Info about the blog itself
+	 */
+	function get_docs( $in ) {
+
+		$docs = new SJF_Ecwid_Admin_Documentation;
+
+		$namespace = SJF_Ecwid_Helpers::get_namespace();
+
+		$label = esc_html__( 'Slider Shortcode', 'sjf-et' );
+
+		$content_1 = '<p>' . esc_html__( 'The slider shortcode can be used like this:', 'sjf-et') . '</p>'; 
+		$content_2 = '<p><code>[sjf_et_slider image_size="" which_products="6093245, 46093237"]</code></p>';
+		$content_3 = '<p>' . esc_html__( 'You may specify products, by ID number, comma-seperated, or the shortcode will not output anything.', 'sjf-et' ) . '</p>';
+		$content_4 = '<p>' . esc_html__( 'You may also specify an image size: "thumbnailUrl", "imageUrl", "smallThumbnailUrl", "originalImageUrl"', 'sjf-et' ) . '</p>';
+
+		$content = $content_1 . $content_2 . $content_3 . $content_4;
+		
+		$out = $docs -> get_doc( $label, __FUNCTION__, $content );
+
+		return $in . $out;
 	}
 
 }

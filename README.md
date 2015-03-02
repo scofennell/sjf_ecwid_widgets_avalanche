@@ -7,16 +7,16 @@ Grab your Ecwid products and categories into a variety of WordPress widgets, inc
 scofennell@gmail.com
 
 ###### Tags
-Ecwid, Ecommerce, E-Commerce, Online Store, Ecwid Slider, Ecwid Popup, Ecwid Accordion.
+Ecwid, Ecommerce, E-Commerce, Online Store, Ecwid Slider, Ecwid Popup, Ecwid Accordion, Ecwid Table.
 
 ###### Requires at least
 4.1
 
 ###### Tested up to
-4.1
+4.1.1
 
 ###### Stable tag
-1.1.1
+1.5.3
 
 ###### License
 GPLv2 or later
@@ -32,6 +32,9 @@ Grab your Ecwid products and categories into a variety of WordPress widgets incl
 *   A slider.
 *   A popup.
 *   An accordion.
+*   An autosuggest.
+*   A sortable table.
+*   A link to an RSS feed for your products.
 
 Installation
 ------------
@@ -47,7 +50,7 @@ Frequently Asked Questions
 ###### The plugin won't work.  Why?
 Make sure you have an ecwid store with an account that allows API access.  This may mean you need a paid ecwid account.
 
-###### Does this plugin makes my site really slow?
+###### Does this plugin make my site really slow?
 Only for one page load.  It calls Ecwid, gets your store data, and caches it locally for future use.  Unless you have WordPress in debug mode and you are logged in to the site.  Then it does not cache.
 
 ###### A cache?  What if I make changes to my products in Ecwid.com?
@@ -72,30 +75,52 @@ This is the plugin settings screen.  You must visit this screen after activating
 
 This is the slider widget.
 
-![Settings screen](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-2.png)
+![Slider widget](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-2.png)
 
 This is the popup widget.
 
-![Settings screen](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-3.png)
+![popup widget](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-3.png)
 
 This is the accordion widget.
 
-![Settings screen](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-4.png)
+![Accordion widget](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-4.png)
 
-This is the slider widget in wp-admin.
+This is the autosuggest widget.
 
-![Settings screen](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-5.png)
+![Autosuggest widget](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-5.png)
 
-This is the popup widget in wp-admin.
+This is the accordion widget.
 
-![Settings screen](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-6.png)
+![Accordion widget](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-6.png)
 
-This is the accordion widget in wp-admin.
+This is the RSS widget.
 
-![Settings screen](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-7.png)
+![RSS widget](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-7.png)
 
 Changelog
 ---------
+
+### 1.5.3
+Moved docs sections to their widget files.
+
+### 1.5.2
+Moved JS to its own file, fixed JS error in wp-admin.
+
+### 1.5.1
+Fixed trailing slash error with feed 404.
+
+### 1.5
+Added RSS widget & feed.
+
+### 1.4
+Added sortable table widget.
+Standardized css classes.
+
+### 1.3
+Added debug console in wp-admin.
+
+### 1.2
+Added Autosuggest widget.
 
 ### 1.1.1
 Stop asking Ecwid for permissions we don't need.
