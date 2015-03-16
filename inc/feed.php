@@ -474,13 +474,21 @@ class SJF_Ecwid_Feed {
 	/**
 	 * Get the url for this channel.
 	 * 
+	 * @param  string $format 'pretty' or 'ugly' permalink.
 	 * @return string the URL for this channel.
 	 */
-	function get_channel_url() {
+	function get_channel_url( $format = 'pretty' ) {
 
-		// Ask WordPress for the link to our feed.
-		$out = untrailingslashit( esc_url( get_feed_link( $this -> feed_url ) ) );
-	
+		$url = $this -> feed_url;
+
+		if( $format == 'pretty' ) {
+			$url = get_feed_link( $url );
+		} else {
+			$url = add_query_arg( array( 'feed' => $url ), trailingslashit( home_url() ) );
+		}
+
+		$out = untrailingslashit( esc_url( $url ) );
+
 		return $out;
 
 	}
@@ -661,85 +669,5 @@ class SJF_Ecwid_Feed {
 		return $generator;
 
 	}
-
-	/**
-	 * Hoarded code for getting Google Merchants products.
-	 */
-
-	/*
-	function get_item_g_price( $item ) {
-		return '<g:price>' . htmlspecialchars( $item['price'] ) . '</g:price>';
-	}
-
-	function get_item_g_id( $item ) {
-		return '<g:id xmlns:g="http://base.google.com/ns/1.0">' . htmlspecialchars( $item['sku'] ) . '</g:id>';
-	}
-
-	function get_item_g_image_link( $item ) {
-		
-		if( ! isset( $item['originalImageUrl'] ) ) { return FALSE; }
-
-		$src = esc_url( $item['originalImageUrl'] );
-
-		$out = "<g:image_link xmlns:g='http://base.google.com/ns/1.0'>$src</g:image_link>";
-
-		return $out;
-	}
-
-	function get_item_g_shipping_weight( $item ) {
-		$weight = $item['weight'];
-		$weight = SJF_Ecwid_Formatting::get_weight( $weight );
-		$out =  "<g:shipping_weight xmlns:g='http://base.google.com/ns/1.0'>$weight</g:shipping_weight>";
-		return $out;
-	}
-
-	function get_item_g_availability( $item ) {
-		$in_stock = $item['inStock'];
-		$avail = 'in stock';
-		if( ! $in_stock ) {
-			$avail = 'out of stock';
-		}
-		$out = "<g:availability xmlns:g='http://base.google.com/ns/1.0'>$avail</g:availability>";
-		return $out;
-	}
-
-	function get_item_g_product_type( $item ) {
-		//list the full string: Home & Garden > Kitchen & Dining > Kitchen Appliances > Refrigerators. You must use " > " as a separator, including a space before and after the symbol.
-		
-		$out = '';
-
-		$category_ids = array_map( 'absint',  $item['categoryIds'] );
-		
-		$count = count( $category_ids );
-
-		$i = 0;
-		foreach( $category_ids as $category_id ) {
-			$i++;
-
-			// @todo Need to find a way to grab multiple categories by ID.
-			$collection = new SJF_Ecwid_Collection( "categories/$category_id" );
-			$cat = $collection -> get_collection();
-			
-			// If there is something weird about this category, bail.
-			if( ! isset( $cat['name'] ) ) { continue; }
-
-			$name = htmlspecialchars( $cat['name'] );
-
-			$out .= "$name";
-
-			if( $i < $count ) {
-				$out .= ' &gt; ';
-			}
-
-		}
-
-		if( ! empty( $out ) ) {
-			$out = "<g:product_type>$out</g:product_type>";
-		}
-
-		return $out;
-		
-	}
-	*/
 
 }

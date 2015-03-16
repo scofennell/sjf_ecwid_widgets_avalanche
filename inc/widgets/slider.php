@@ -197,7 +197,7 @@ class SJF_ET_Slider extends WP_Widget {
 
 		<p>
 			<label for="<?php echo $this->get_field_id( 'which_products' ); ?>"><?php _e( 'Which Products:' ); ?></label> 
-			<?php echo SJF_Ecwid_Admin_Helpers::get_collection_as_checkboxes( 'products', $which_products, $this -> get_field_name( 'which_products' ) ); ?>
+			<?php echo SJF_Ecwid_Admin_Helpers::get_collection_as_checkboxes( 'products', $which_products, $this -> get_field_name( 'which_products' ), TRUE ); ?>
 		</p>
 
 		<p>

@@ -31,10 +31,26 @@ Class SJF_Ecwid_Enqueue {
 		// Powers the sortable widget.
 		wp_register_script( 'tablesorter', SJF_ET_INC_URL . 'js/jquery.tablesorter.min.js', array( 'jquery' ), SJF_ET_VERSION );
 	
+		// Powers any call to the Ecwid API ... though the store front calls this anyways.
+		// wp_register_script( 'ecwid-js-api', $this -> get_ecwid_js_api_url(), array( 'jquery' ), SJF_ET_VERSION  );
+		
 		// Grab our base scripts.
 		wp_register_script( $namespace . '_scripts', SJF_ET_INC_URL . 'js/scripts.js', array( 'jquery' ), SJF_ET_VERSION );
 		wp_enqueue_script( $namespace . '_scripts' );
 
 	}
+
+
+	/**
+	 * Enqueue the ecwid.com JS API.
+	 */
+	public function get_ecwid_js_api_url() {
+		
+		$id = SJF_Ecwid_Helpers::get_store_id();
+
+		return esc_url( "//app.ecwid.com/script.js?$id" );
+
+	}
+
 
 }

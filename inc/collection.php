@@ -89,6 +89,15 @@ class SJF_Ecwid_Collection {
 			$route = add_query_arg( array( 'parent' => $parent ), $route );
 		}
 
+		// Parse the arg for including subCategories.  Expects Boolean.
+		$with_subcategories = FALSE;
+		if( isset( $args['with_subcategories'] ) ) {
+			$with_subcategories = rawurldecode( $args['with_subcategories'] );
+			if( ! empty( $with_subcategories ) ) {
+				$route = add_query_arg( array( 'withSubcategories' => $with_subcategories ), $route );
+			}
+		}
+
 		$result = $ecwid -> call( $route );
 
 		if( is_wp_error( $result ) ) {

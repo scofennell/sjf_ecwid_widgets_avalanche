@@ -213,9 +213,11 @@ class SJF_ET_RSS extends WP_Widget {
 		
 		$feed = new SJF_Ecwid_Feed;
 
-		$feed_url = $feed -> get_channel_url();
-
+		$feed_url  = $feed -> get_channel_url();
 		$feed_link = "<code><a target='_blank' href='$feed_url'>$feed_url</a></code>";
+
+		$ugly_url  = $feed -> get_channel_url( 'ugly' );
+		$ugly_link = "<code><a target='_blank' href='$ugly_url'>$ugly_url</a></code>";
 
 		$content_1 = '<p>' . esc_html__( 'The RSS shortcode can be used like this:', 'sjf-et') . '</p>'; 
 		$content_2 = '<p><code>[sjf_et_rss label="click me"]</code></p>';
@@ -223,8 +225,9 @@ class SJF_ET_RSS extends WP_Widget {
 		$content_4 = '<p>' . esc_html__( 'The shortcode points to a special RSS feed for your store products.  You may need to clear your caches (see above) in order for this feed to work.' ) . '</p>';
 		$content_5 = '<p>' . esc_html__( 'The feed is valid RSS2 and can be used with services like MailChimp and FeedBurner.  It is not a Google Merchants feed and will not work as one.' ) . '</p>';
 		$content_6 = '<p>' . sprintf( esc_html__( 'Your feed can be found at %s.', 'sjf-et' ), $feed_link ) . '</p>';
+		$content_7 = '<p>' . sprintf( esc_html__( 'If you have trouble with your feed, try toggling your permalink settings back to default, and then back to whatever you like to keep them at.  You can also try to find your feed at the "ugly" permalink: %s.', 'sjf-et' ), $ugly_link ) . '</p>';
 
-		$content = $content_1 . $content_2 . $content_3 . $content_4 . $content_5  . $content_6;
+		$content = $content_1 . $content_2 . $content_3 . $content_4 . $content_5  . $content_6 . $content_7;
 
 		$out = $docs -> get_doc( $label, __FUNCTION__, $content );
 		

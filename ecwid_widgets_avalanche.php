@@ -4,7 +4,7 @@
  * Plugin Name: Widgets Avalanche for Ecwid
  * Plugin URI:  http://www.scottfennell.org/ecwid
  * Description: A host of widgets for integrating Ecwid with WordPress.
- * Version:     1.5.3
+ * Version:     1.5.4
  * Author:      Scott Fennell
  * Author URI:  http://www.scottfennell.org/
  * Text Domain: sjf-et
@@ -31,7 +31,7 @@
 if ( ! defined( 'WPINC' ) ) { die; }
 
 // Establish a value for plugin version to bust file caches.
-define( 'SJF_ET_VERSION', '1.5.3' );
+define( 'SJF_ET_VERSION', '1.5.4' );
 
 // A constant to define the paths to our plugin folders.
 define( 'SJF_ET_FILE', __FILE__ );

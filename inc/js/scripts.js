@@ -7,6 +7,134 @@
  */
 
 /**
+ * Helpers
+ */
+
+var SJFETHelpers = {
+
+	catSep: function() {
+		return 'which_categories=';
+	},
+
+	getUrlBase: function( url ) {
+		var urlArr = [];
+		if( typeof url !== 'string' ) { return; }
+		urlArr = url.split( this.catSep() );
+		return urlArr[0];
+	},
+
+	getQueryString: function( urlToSplit ) {
+
+		var urlArr = [];
+		var count = 0;
+		if( typeof urlToSplit !== 'string' ) { return; }
+
+
+		urlArr = urlToSplit.split( this.catSep() );
+		
+		if( typeof urlArr !== 'object' ) { return; }
+
+		count = urlArr.length;
+
+		if( count > 1 ) {
+			return urlArr[1];
+		}
+
+	},
+
+	getCatArray: function( url ) {
+
+		var queryStr = this.getQueryString( url );
+
+		var catArr = [];
+		if( typeof queryStr !== 'string' ) { return catArr; }
+		catArr = queryStr.split( ',' );
+		return catArr;
+
+	},
+
+	removeCat: function( url, catToRemove ) {
+
+		var out  = '';
+		var cats = [];
+		var base = this.getUrlBase( url );
+		var queryArr = this.getCatArray( url );
+
+		if( typeof queryArr !== 'object' ) { return; }
+
+		var count = queryArr.length;
+
+		for ( var i = 0; i < count; i++ ) {
+			if( queryArr[i] != catToRemove ) {
+				cats.push( queryArr[i] );
+			}
+		}
+
+		if( typeof cats !== 'object' ) { return; }
+		var catCount = cats.length;
+
+		cats.join( ',' );
+
+		out = base;
+		if( catCount > 0 ) {
+			out = out + this.catSep() + cats;
+		}
+
+		return out;
+
+	},
+
+	addCat: function( url, catToAdd ) {
+		var out  = ''; 
+		var base = this.getUrlBase( url );
+		var cats = this.getCatArray( url );
+		if( typeof cats !== 'object' ) { return; }
+
+		if( jQuery.inArray( catToAdd, cats ) !== -1 ) {
+			return url;
+		}
+
+		
+		cats.push( catToAdd );
+		cats.join( ',' );
+		out = base + this.catSep() + cats;
+		return out;	
+	},
+
+	replaceCat: function( url, catToRemove, catToAdd ) {
+		var url = this.removeCat( url, catToRemove );
+
+		url = this.addCat( url, catToAdd );
+
+		if( typeof url === 'string' ) {
+			url = url.replace( '=,', '=' );
+		}
+
+		return url;
+	},
+
+	getNumericCats: function( url ) {
+		var out = [];
+
+		var cats = this.getCatArray( url );
+
+		if ( typeof cats !== 'object' ) { return; }
+
+		var count = cats.length;
+
+		for ( var i = 0; i < count; i++ ) {
+			if( jQuery.isNumeric( cats[i] ) ) {
+				var cat = parseInt( cats[i] );
+				out.push( cat );
+			}
+		}
+
+		return out;
+	}
+
+};
+
+/**
  * Autosuggest
  *
  * The args were localized in the Autosuggest widget file.
@@ -135,9 +263,9 @@ jQuery( document ).ready( function( $ ) {
 	
 	// Hide all elements that carry our plugin hide class.
 	var hide = $( '.sjf_et_accordion' );
-    $( hide ).hide();
+	$( hide ).hide();
 
-    // Our plugin toggler class.  When it's clicked, it's hidden slblings are revealed.
+	// Our plugin toggler class.  When it's clicked, it's hidden slblings are revealed.
 	var toggle = $( '.sjf_et-toggle' );
 	$( toggle ).click( function( event ) {
 		event.preventDefault();
@@ -191,8 +319,100 @@ jQuery( document ).ready( function( $ ) {
 jQuery( document ).ready( function( $ ) { 
 
 	if( ! $.tablesorter ) { return false; }
+	if( typeof SJF_ET_Sortable === "undefined" ) { return false; }
+	
+	// After the table loads, make it sortable.
+	function loadTable( el, child, url ) {
 
-	$( '.sjf_et_sortable_get_sortable' ).tablesorter();
+		$( el ).load( url, function() {
+			var loaded = $( el ).find( child );
+			loaded.tablesorter();
+		});
+	}
+
+	function gettingCurrent( whichCatsArr ) {
+
+		var currentInArray = jQuery.inArray( 'current', whichCatsArr );
+		
+		if( currentInArray === -1 ) { return -1; }
+
+		if( typeof Ecwid !== 'object' ) { return -1; }
+		
+		return 1;
+			
+	}
+
+	function findCurrent( page ) {
+		var ID = 0;
+		if( ( typeof page.categoryId ) !== 'number' ) { return ID; }
+							
+		if( page.categoryId < 1 ) { return ID; }
+							
+		ID = page.categoryId;
+
+		return ID;
+
+	}
+
+	var baseUrl     = SJF_ET_Sortable.base_url;
+	var loaderClass = '.' + SJF_ET_Sortable.loader_class;
+	var sortables   = $( loaderClass );
+	$( sortables ).each( function( index, value ) {
+		
+		var sortable = this;
+
+		var whichCats = $( this ).data( 'which_categories' );
+		var url       = baseUrl + '?' + SJFETHelpers.catSep() + whichCats;
+		var whichCatsArr       = SJFETHelpers.getCatArray( url );	
+		var specified          = SJFETHelpers.getNumericCats( url );
+		var ID                 = 0;
+		var getCurrent         = -1;
+		var gotCurrent         = 0;
+		var currentIsSpecified = -1;
+
+		getCurrent = gettingCurrent( whichCatsArr );
+
+		if( getCurrent > -1 ) {
+			
+			Ecwid.OnPageLoad.add( function( page ) {
+
+				ID = findCurrent( page );
+
+				if( ID > 0 ) {
+					
+					currentIsSpecified = jQuery.inArray( ID, specified );
+					if( currentIsSpecified == -1 ) {
+							
+						url = SJFETHelpers.replaceCat( url, 'current', ID );
+						gotCurrent = 1;
+
+					}
+
+					loadTable( sortable, '.sjf_et_sortable_get_sortable', url );
+
+					if( currentIsSpecified == -1 ) {
+						url = SJFETHelpers.replaceCat( url, ID, 'current' );
+					}
+
+				} else {
+					loadTable( sortable, '.sjf_et_sortable_get_sortable', url );
+				}
+					
+			});
+
+		}
+
+		if( gotCurrent < 1 ) {
+
+			url = SJFETHelpers.removeCat( url, 'current' );
+
+			loadTable( sortable, '.sjf_et_sortable_get_sortable', url );
+		
+		}
+
+		
+	// End each sortable.
+	});
 
 	$( '.sjf_et_sortable_get_table_head-th-link' ).click( function( event ) {
 		event.preventDefault();

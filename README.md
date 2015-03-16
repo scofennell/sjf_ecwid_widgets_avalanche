@@ -16,7 +16,7 @@ Ecwid, Ecommerce, E-Commerce, Online Store, Ecwid Slider, Ecwid Popup, Ecwid Acc
 4.1.1
 
 ###### Stable tag
-1.5.3
+1.5.4
 
 ###### License
 GPLv2 or later
@@ -51,7 +51,10 @@ Frequently Asked Questions
 Make sure you have an ecwid store with an account that allows API access.  This may mean you need a paid ecwid account.
 
 ###### Does this plugin make my site really slow?
-Only for one page load.  It calls Ecwid, gets your store data, and caches it locally for future use.  Unless you have WordPress in debug mode and you are logged in to the site.  Then it does not cache.
+Only for one page load.  It calls Ecwid, gets your store data, and caches it in your WordPress database for future use.  Unless you have WordPress in debug mode and you are logged in to the site.  Then it does not cache.
+
+###### Wait, so there is a slow page load?  For every user?
+No, just for one user.  Once one user loads the page, your WordPress site will have cached the data from Ecwid, and this establishes the cache from which all other users will benefit for the lifetime of that cache.
 
 ###### A cache?  What if I make changes to my products in Ecwid.com?
 You'll need to dump your cached data in order to see those changes.  There are three ways to do that:
@@ -89,9 +92,9 @@ This is the autosuggest widget.
 
 ![Autosuggest widget](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-5.png)
 
-This is the accordion widget.
+This is the sortable widget.
 
-![Accordion widget](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-6.png)
+![Sortable widget](https://raw.githubusercontent.com/scofennell/sjf_ecwid_widgets_avalanche/master/assets/screenshot-6.png)
 
 This is the RSS widget.
 
@@ -99,6 +102,9 @@ This is the RSS widget.
 
 Changelog
 ---------
+
+### 1.5.4
+Improved FAQ.
 
 ### 1.5.3
 Moved docs sections to their widget files.

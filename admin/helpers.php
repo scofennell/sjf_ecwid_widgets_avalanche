@@ -66,9 +66,10 @@ class SJF_Ecwid_Admin_Helpers {
 	 * @param  string $route The route to the collection.
 	 * @param  array $which_members An array of member ID's to power checked().
 	 * @param  string The name of the checkbox group.
+	 * @param  boolean Offer a value to react to the current ecwid store category as the user navigates his store.
 	 * @return string Products as HTML checkbox inputs.
 	 */
-	public static function get_collection_as_checkboxes( $route, $which_members, $name ) {
+	public static function get_collection_as_checkboxes( $route, $which_members, $name, $offer_current ) {
 		
 		$out = '';
 
@@ -77,12 +78,36 @@ class SJF_Ecwid_Admin_Helpers {
 		// Get all products.
 		$collection = new SJF_Ecwid_Collection( $route );
 		$result = $collection -> get_collection();
+		if( ! isset( $result['items'] ) ) {
+			return FALSE;
+		}
 		$items = $result['items'];
 		if( ! is_array( $items ) ) {
 			return FALSE;
 		}
 
 		$route_class = sanitize_html_class( $route );
+
+		// Do we want to allow the user to choose to track the current category?
+		if( $offer_current ) {
+
+			// The input name for this checkbox.
+			$this_name = $name . "[current]";
+
+			$checked = '';
+			if( isset( $which_members['current'] ) ) {
+				$checked = checked( $which_members['current'], 1, FALSE );
+			}
+			$title = esc_html__( '(The current category)', 'sjf-et' );
+			$out .= "
+				<li class='$namespace-checkbox-$route_class'>
+					<label>
+						<input $checked name='$this_name' value='1' type='checkbox'>
+						<strong>$title</strong>
+					</label>
+				</li>
+			";
+		}
 
 		// For each product...
 		foreach( $items as $item ) {

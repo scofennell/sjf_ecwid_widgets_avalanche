@@ -18,6 +18,30 @@ add_action( 'widgets_init', 'sjf_et_register_sortable' );
  */
 class SJF_ET_Sortable extends WP_Widget {
 
+	public $products_already_output = array();
+
+	public $which_categories = array();
+
+	/**
+	 * The slug for our feed.
+	 */
+	public function get_feed_slug() {
+		return strtolower( __CLASS__ );
+	}
+
+	/**
+	 * The class that identifies the div into which the widget will load.
+	 */
+	public function get_loader_class() {
+		return SJF_Ecwid_Formatting::get_class_name( __CLASS__ ) . '-load';
+	}
+
+	public function get_feed_url() {
+		$slug = $this -> get_feed_slug();
+		$out  = get_feed_link( $slug );
+		return $out;
+	}
+
 	/**
 	 * Register widget with WordPress.
 	 */
@@ -27,7 +51,12 @@ class SJF_ET_Sortable extends WP_Widget {
 
 		add_shortcode( SJF_Ecwid_Formatting::get_class_name( __CLASS__ ), array( $this, 'shortcode' ) );
 
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue' ), 999 );
+
 		add_filter( 'SJF_Ecwid_Admin_Documentation_get_docs', array( $this, 'get_docs' ), 70 );
+
+		// We need to wait until init before we add a feed.
+		add_action( 'init', array( $this, 'init' ) );
 
 		parent::__construct(
 
@@ -43,6 +72,28 @@ class SJF_ET_Sortable extends WP_Widget {
 			)
 		
 		);
+	}
+
+	public function enqueue() {
+
+		$namespace = SJF_Ecwid_Helpers::get_namespace();
+
+		// The php vars for this widget.
+		$local = $this -> script();
+
+		// Send to the plugin-wide JS file.
+		wp_localize_script( $namespace . '_scripts', __CLASS__, $local );
+
+		// Grab the bxsortable script.
+		wp_enqueue_script( 'tablesorter' );
+
+	}
+
+	/**
+	 * Register our feed with WordPress.
+	 */
+	public function init() {
+		add_feed( $this -> get_feed_slug(), array( $this, 'the_feed' ) );
 	}
 
 	/**
@@ -100,16 +151,15 @@ class SJF_ET_Sortable extends WP_Widget {
 	 * @param array $args     Widget arguments.
 	 * @param array $instance Saved values from database.
 	 */
-	public function widget( $args = array(), $instance = array(), $echo = TRUE  ) {
+	public function widget( $args = array(), $instance = array(), $echo = TRUE ) {
 		
 		// From which categories are we grabbing?
-		$which_categories = array();
+		$which_categories = '';
 		if( isset( $instance['which_categories'] ) ) {
 			$which_categories = $instance['which_categories'];
-		}
+			$which_categories = implode( ',', array_keys( $which_categories ) );
 
-		// Grab the table.
-		$out = $this -> get_sortable( $which_categories );
+		}
 
 		$before_widget = $args['before_widget'];
 		$after_widget  = $args['after_widget'];
@@ -120,8 +170,19 @@ class SJF_ET_Sortable extends WP_Widget {
 			$after_title  = $args['after_title'];
 			$title        = $before_title . apply_filters( 'widget_title', $instance['title'] ) . $after_title;
 		}
-		
-		$out = $before_widget . $title . $out . $after_widget;
+
+		$id           = SJF_Ecwid_Formatting::get_class_name( $args['widget_id'] );
+		$loader_class = $this -> get_loader_class();
+	
+		// This div gets the table ajax'd into it.
+		$load   = "<div id='$id' class='$loader_class' data-which_categories='$which_categories'></div>";
+
+		$out = "
+			$before_widget
+				$title
+				$load
+			$after_widget
+		";
 
 		if( $echo ) {
 			echo $out;
@@ -129,6 +190,20 @@ class SJF_ET_Sortable extends WP_Widget {
 			return $out;
 		}
 
+	}
+
+	// The feed is a url that hosts the html for the table.  That url gets loaded via ajax.
+	public function the_feed() {
+		$which_categories = '';
+		if( ! isset( $_GET['which_categories'] ) ) { return FALSE; }
+		$cats = explode( ',', $_GET['which_categories'] );
+		$which_categories = array();
+		foreach( $cats as $c ) {
+			$which_categories[ $c ]= 1;
+		}
+
+		$out = $this -> get_sortable( $which_categories );
+		echo $out;
 	}
 
 	/**
@@ -153,7 +228,7 @@ class SJF_ET_Sortable extends WP_Widget {
 
 		<p>
 			<label for="<?php echo $this->get_field_id( 'which_categories' ); ?>"><?php _e( 'Which Categories:' ); ?></label> 
-			<?php echo SJF_Ecwid_Admin_Helpers::get_collection_as_checkboxes( 'categories', $which_categories, $this -> get_field_name( 'which_categories' ) ); ?>
+			<?php echo SJF_Ecwid_Admin_Helpers::get_collection_as_checkboxes( 'categories', $which_categories, $this -> get_field_name( 'which_categories' ), TRUE ); ?>
 		</p>
 
 		<?php 
@@ -192,22 +267,6 @@ class SJF_ET_Sortable extends WP_Widget {
 	 */
 	function get_sortable( $which_categories ) {
 
-		// Make sure we have some products to loop through.
-		$which_categories = array_keys( $which_categories );
-
-		// If there are no categories specified, get all categories.
-		$num_cats = count( $which_categories );
-		if( empty( $num_cats ) ) {
-			
-			$which_categories = SJF_Ecwid_Helpers::get_all_category_ids();
-		
-		}
-
-		$out = '';
-
-		// Grab the bxsortable script.
-		wp_enqueue_script( 'tablesorter' );
-
 		$namespace = SJF_Ecwid_Helpers::get_namespace();
 
 		// A class for the sortable module.
@@ -219,105 +278,26 @@ class SJF_ET_Sortable extends WP_Widget {
 		// A class for each row.
 		$row_class = "$namespace-row";
 
-		// If a product is in multiple categories, we don't want to show it twice, so add each product to this array as we use it.
-		$used = array();
+		// Make sure we have some products to loop through.
+		$num_cats = 0;
+		if( is_array( $which_categories ) ) {
+			$which_categories = array_keys( $which_categories );
 
-		$num_cols = count( $which_categories );
+			// If there are no categories specified, get all categories.
+			$num_cats = count( $which_categories );
+
+		}
+
+		if( empty( $num_cats ) ) {
+			$which_categories = SJF_Ecwid_Helpers::get_all_category_ids();	
+		}
+
+		$out = '';
 
 		// For each product ID, make a remote request (I know, right?) and add a row to the sortable.
 		foreach( $which_categories as $which_category ) {
 
-			/**
-			 * Grab products, from this category, from Ecwid.
-			 * 
-			 * @todo It's unfortunate there is not a way to grab multiple products by category ID.
-			 */
-			$args = array(
-				'category' => $which_category,
-			);
-			$collection   = new SJF_Ecwid_Collection( "products", $args );
-			$get_products = $collection -> get_collection();
-			
-			// If our query was weird, forget it.
-			if( ! isset( $get_products['items'] ) ) { continue; }
-			
-			$products = $get_products['items'];
-			
-			// If our products are weird, forget it.
-			if( ! is_array( $products ) ) { continue; }
-
-			// For each product from this category ...
-			foreach( $products as $product ) {
-
-				// If this product has already been used in the table, skip it.
-				if( in_array( $product['id'], $used ) ) { continue; }
-
-				// Add this product to the array of products that have already appeared, so we don't show the same one multiple times in case it is in multiple cats.
-				$used[]= $product['id'];
-
-				$url  = esc_url( $product['url'] );
-				$name = esc_html( $product['name'] );
-
-				$row = '';
-
-				// Way earlier in the script, we defined an array of columns for our table.  For each column...
-				foreach( $which_columns as $col_key => $col_array ) {
-
-					// If the product does not have a value for this column, just give it a space so we don't send an empty cell.
-					if( ! isset( $product[ $col_key ] ) ) {
-						$val = '&nbsp;';
-
-					} else {
-
-						$val = $product[ $col_key ];
-
-						// If we're grabbing the price, format it as such.
-						if( $col_key == 'price' ) {
-							
-							// Prices seem to have trouble sorting properly, so let's add a machine-radable string for sorting.
-							$sort = absint( $val );
-							$val = "<span style='display: none;'>$sort</span>" . SJF_Ecwid_Formatting::get_money( $val );
-						
-						// If we are giving a list of categories, we do need to do some work to output that.
-						} elseif( $col_key == 'categoryIds' ) {
-							$val = $this -> cat_ids_to_link_list( $val );
-
-						// If it happened to be an array, dig in a little.
-						} elseif( is_array( $val ) ) {
-							
-							$val_array = $val;
-							$val = '';
-							foreach( $val_array as $v ) {
-								$val .= $v;
-							}
-						}
-
-						// If this field needs to link to something, wrap it in a link.
-						if( isset( $col_array['link_to'] ) ) {
-
-							// Maybe link to the single product view.
-							if( $col_array['link_to'] == 'url' ) {
-								$val = "<a class='$base_class-cell-link' href='$url'>$val</a>";
-							}
-
-						}
-
-					}
-
-					// Wrap the cell in a td.
-					$cell = "<td class='$base_class-cell'>$val</td>";
-
-					// Add the cell to the row.
-					$row .= $cell;
-
-				}
-
-				$row = apply_filters(  __CLASS__ . '_' . __FUNCTION__ . '_row', $row, $product );
-
-				$out .= "<tr class='$base_class-row'>$row</tr>";
-
-			}
-
+			$out .= $this -> get_category_rows( $which_category, $which_columns, $base_class );
 		}
 
 		// The sortable wrap.
@@ -334,6 +314,121 @@ class SJF_ET_Sortable extends WP_Widget {
 		}
 
 		$out = apply_filters(  __CLASS__ . '_' . __FUNCTION__, $out );
+
+		return $out;
+
+	}
+
+	function get_category_rows( $which_category, $which_columns, $base_class ) {
+		
+		$out = '';
+
+		/**
+		 * Grab products, from this category, from Ecwid.
+		 * 
+		 * @todo It's unfortunate there is not a way to grab multiple products by category ID.
+		 */
+		$args = array(
+			'category'          => $which_category,
+			'with_subcategories' => TRUE,
+		);
+		$collection   = new SJF_Ecwid_Collection( "products", $args );
+		$get_products = $collection -> get_collection();
+
+		// If our query was weird, forget it.
+		if( ! isset( $get_products['items'] ) ) { return FALSE; }
+		
+		$products = $get_products['items'];
+		
+		// If our products are weird, forget it.
+		if( ! is_array( $products ) ) { return FALSE; }
+
+		$num_products = count( $products );
+		if( empty( $num_products ) ) {
+			return FALSE;
+		}
+
+		// For each product from this category ...
+		foreach( $products as $product ) {
+		
+			// If this product has already been used in the table, skip it.
+			if( in_array( $product['id'], $this -> products_already_output ) ) { continue; }
+
+			// Add this product to the array of products that have already appeared, so we don't show the same one multiple times in case it is in multiple cats.
+			$this -> products_already_output[]= $product['id'];
+
+			$out .= $this -> get_product_row( $product, $which_columns, $base_class );
+
+		}
+	
+		return $out;
+
+	}
+
+	function get_product_row( $product, $which_columns, $base_class ) {
+
+		$out = '';
+
+		$url  = esc_url( $product['url'] );
+		$name = esc_html( $product['name'] );
+
+		$row = '';
+
+		// Way earlier in the script, we defined an array of columns for our table.  For each column...
+		foreach( $which_columns as $col_key => $col_array ) {
+
+			// If the product does not have a value for this column, just give it a space so we don't send an empty cell.
+			if( ! isset( $product[ $col_key ] ) ) {
+				$val = '&nbsp;';
+
+			} else {
+
+				$val = $product[ $col_key ];
+
+				// If we're grabbing the price, format it as such.
+				if( $col_key == 'price' ) {
+					
+					// Prices seem to have trouble sorting properly, so let's add a machine-radable string for sorting.
+					$sort = absint( $val );
+					$val = "<span style='display: none;'>$sort</span>" . SJF_Ecwid_Formatting::get_money( $val );
+				
+				// If we are giving a list of categories, we do need to do some work to output that.
+				} elseif( $col_key == 'categoryIds' ) {
+					$val = $this -> cat_ids_to_link_list( $val );
+
+				// If it happened to be an array, dig in a little.
+				} elseif( is_array( $val ) ) {
+					
+					$val_array = $val;
+					$val = '';
+					foreach( $val_array as $v ) {
+						$val .= $v;
+					}
+				}
+
+				// If this field needs to link to something, wrap it in a link.
+				if( isset( $col_array['link_to'] ) ) {
+
+					// Maybe link to the single product view.
+					if( $col_array['link_to'] == 'url' ) {
+						$val = "<a class='$base_class-cell-link' href='$url'>$val</a>";
+					}
+
+				}
+
+			}
+
+			// Wrap the cell in a td.
+			$cell = "<td class='$base_class-cell'>$val</td>";
+
+			// Add the cell to the row.
+			$row .= $cell;
+
+		}
+
+		$row = apply_filters(  __CLASS__ . '_' . __FUNCTION__ . '_row', $row, $product );
+
+		$out .= "<tr class='$base_class-row'>$row</tr>";
 
 		return $out;
 
@@ -460,6 +555,26 @@ class SJF_ET_Sortable extends WP_Widget {
 		}
 
 		return $out;
+
+	}
+
+	/**
+	 * Turn PHP args for our slider into JS args.
+	 */
+	function script() {
+		
+		$loader_class = $this -> get_loader_class();
+
+		$base_url = $this -> get_feed_url();
+	
+		// Localize the args.
+		$local = array(
+			'base_url'     => $base_url,
+			'loader_class' => $loader_class,
+		);
+
+		// Return the localized version of the args so it can be used in a JS file.
+		return $local;
 
 	}
 
